@@ -13,7 +13,7 @@ public class TypeOfService {
         this.id = id;
         this.service = service;
         this.appointmentList = appointmentList;
-        this.doctors = doctors;
+        this.doctorsWhoCanPerformService = doctors;
     }
     public TypeOfService() {
 
@@ -45,12 +45,12 @@ public class TypeOfService {
         this.appointmentList = appointmentList;
     }
 
-    public List<User> getDoctors() {
-        return doctors;
+    public List<User> getDoctorsWhoCanPerformService() {
+        return doctorsWhoCanPerformService;
     }
 
-    public void setDoctors(List<User> doctors) {
-        this.doctors = doctors;
+    public void setDoctorsWhoCanPerformService(List<User> doctors) {
+        this.doctorsWhoCanPerformService = doctors;
     }
     //endregion
 
@@ -66,6 +66,6 @@ public class TypeOfService {
 
     @ManyToMany(mappedBy = "services")
     @JsonIgnoreProperties("services")
-    private List<User> doctors;
+    private List<User> doctorsWhoCanPerformService;
 
 }

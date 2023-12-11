@@ -6,9 +6,10 @@ import ro.chirila.programarispital.repository.entity.TypeOfService;
 
 import java.util.List;
 
-public class UserResponseDTO {
-    private String username;
-    private Role role;
-    private List<Appointment> appointments;
-    private List<TypeOfService> services;
+public record UserResponseDTO(
+        String username,
+        Role role,
+        List<Appointment> appointments,
+        List<TypeOfService> services) {
+
 }
