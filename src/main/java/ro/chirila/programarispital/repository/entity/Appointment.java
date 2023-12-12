@@ -12,7 +12,7 @@ public class Appointment {
 
     //region Constructors
     public Appointment(Long id, String email, String firstName, String lastName, Date dateOfBirth, String phoneNumber, List<TypeOfService> typeOfServices,
-                       Date chooseDate, LocalTime appointmentHour, User scheduledPerson) {
+                       Date chooseDate, LocalTime appointmentHour, User scheduledPerson, PeriodOfAppointment periodOfAppointment) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -23,6 +23,7 @@ public class Appointment {
         this.chooseDate = chooseDate;
         this.appointmentHour = appointmentHour;
         this.scheduledPerson = scheduledPerson;
+        this.periodOfAppointment = periodOfAppointment;
     }
     public Appointment() {
 
@@ -110,6 +111,14 @@ public class Appointment {
     public void setScheduledPerson(User scheduledPerson) {
         this.scheduledPerson = scheduledPerson;
     }
+
+    public PeriodOfAppointment getPeriodOfAppointment() {
+        return periodOfAppointment;
+    }
+
+    public void setPeriodOfAppointment(PeriodOfAppointment periodOfAppointment) {
+        this.periodOfAppointment = periodOfAppointment;
+    }
     //endregion
 
     @Id
@@ -118,15 +127,13 @@ public class Appointment {
     private Long id;
 
     private String email;
-
     private String firstName;
-
     private String lastName;
     private String phoneNumber;
     private Date dateOfBirth;
     private Date chooseDate;
     private LocalTime appointmentHour;
-
+    private PeriodOfAppointment periodOfAppointment;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinTable(
@@ -141,6 +148,7 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "id_person", referencedColumnName = "id_person")
     private User scheduledPerson;
+
 
 
 }

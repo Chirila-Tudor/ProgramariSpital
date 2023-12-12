@@ -3,6 +3,8 @@ package ro.chirila.programarispital.repository.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.hibernate.validator.constraints.UniqueElements;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,7 +22,9 @@ public class User {
         this.appointments = appointments;
         this.services = services;
     }
-    public User(){}
+
+    public User() {
+    }
     //endregion
 
     //region Getter and Setter
@@ -97,7 +101,7 @@ public class User {
 
     @JsonIgnoreProperties("scheduledPerson")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "scheduledPerson")
-    private List<Appointment> appointments;
+    private List<Appointment> appointments = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
@@ -105,6 +109,6 @@ public class User {
             joinColumns = @JoinColumn(name = "doctor_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
-    private List<TypeOfService> services;
+    private List<TypeOfService> services = new ArrayList<>();
 
 }
