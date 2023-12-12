@@ -10,6 +10,7 @@ public record UserResponseDTO(
         String username,
         Role role,
         List<Appointment> appointments,
-        List<TypeOfService> services) {
+        List<TypeOfService> services,
+        Boolean isActive) {
 
 }
