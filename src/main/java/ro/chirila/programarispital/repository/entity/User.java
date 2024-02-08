@@ -13,7 +13,7 @@ public class User {
 
     //region Constructors
     public User(Long id, String username, String password, Boolean hasPassword, Role role, List<Appointment> appointments,
-                List<TypeOfService> services) {
+                List<TypeOfService> services, Boolean isActive) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -21,6 +21,7 @@ public class User {
         this.role = role;
         this.appointments = appointments;
         this.services = services;
+        this.isActive = isActive;
     }
 
     public User() {
@@ -83,6 +84,14 @@ public class User {
     public void setServices(List<TypeOfService> services) {
         this.services = services;
     }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
     //endregion
 
     @Id
@@ -98,6 +107,8 @@ public class User {
     private Boolean hasPassword;
 
     private Role role;
+
+    private Boolean isActive;
 
     @JsonIgnoreProperties("scheduledPerson")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "scheduledPerson")

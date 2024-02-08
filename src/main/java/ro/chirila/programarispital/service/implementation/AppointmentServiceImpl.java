@@ -9,6 +9,7 @@ import ro.chirila.programarispital.repository.TypeOfServiceRepository;
 import ro.chirila.programarispital.repository.UserRepository;
 import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
 import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
+import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
 import ro.chirila.programarispital.repository.dto.TypeOfServiceDTO;
 import ro.chirila.programarispital.repository.entity.Appointment;
 import ro.chirila.programarispital.repository.entity.TypeOfService;
@@ -17,6 +18,7 @@ import ro.chirila.programarispital.service.AppointmentService;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -65,6 +67,66 @@ public class AppointmentServiceImpl implements AppointmentService {
         AppointmentResponseDTO responseDTO = modelMapper.map(appointmentRepository.save(savedAppointment), AppointmentResponseDTO.class);
         responseDTO.setScheduledPerson(user);
         return responseDTO;
+    }
+
+    @Override
+    public AppointmentResponseDTO updateAppointment(Long id, AppointmentUpdateDTO appointmentUpdateDTO) {
+        if (appointmentRepository.findById(id).isPresent()) {
+            Appointment appointment = appointmentRepository.findById(id).get();
+
+            if (appointmentUpdateDTO.email() != null) {
+                appointment.setEmail(appointmentUpdateDTO.email());
+            }
+            if (appointmentUpdateDTO.firstName() != null) {
+                appointment.setFirstName(appointmentUpdateDTO.firstName());
+            }
+            if (appointmentUpdateDTO.lastName() != null) {
+                appointment.setLastName(appointmentUpdateDTO.lastName());
+            }
+            if (appointmentUpdateDTO.phoneNumber() != null) {
+                appointment.setPhoneNumber(appointmentUpdateDTO.phoneNumber());
+            }
+            if (appointmentUpdateDTO.dateOfBirth() != null) {
+                appointment.setDateOfBirth(appointmentUpdateDTO.dateOfBirth());
+            }
+            if (appointmentUpdateDTO.chooseDate() != null) {
+                appointment.setChooseDate(appointmentUpdateDTO.chooseDate());
+            }
+            if (appointmentUpdateDTO.appointmentHour() != null) {
+                appointment.setAppointmentHour(appointmentUpdateDTO.appointmentHour());
+            }
+            if (appointmentUpdateDTO.periodOfAppointment() != null) {
+                appointment.setPeriodOfAppointment(appointmentUpdateDTO.periodOfAppointment());
+            }
+
+            if (appointmentUpdateDTO.typeOfService() != null) {
+                if (appointmentUpdateDTO.typeOfService().isEmpty()) {
+                    throw new RuntimeException("Please select at least one type of service.");
+                }
+                List<TypeOfService> newTypeOfServiceList = new ArrayList<>();
+
+                for (TypeOfServiceDTO typeOfServiceDTO : appointmentUpdateDTO.typeOfService()) {
+
+                    TypeOfService newTypeOfService = typeOfServiceRepository.findByService(typeOfServiceDTO.service());
+                    if (newTypeOfService == null) {
+                        TypeOfService addedTypeOfService = new TypeOfService();
+                        addedTypeOfService.setService(typeOfServiceDTO.service());
+                        typeOfServiceRepository.save(addedTypeOfService);
+                        newTypeOfServiceList.add(addedTypeOfService);
+                    } else {
+                        newTypeOfServiceList.add(newTypeOfService);
+                    }
+                }
+                appointment.setTypeOfServices(newTypeOfServiceList);
+            }
+
+            AppointmentResponseDTO responseDTO = modelMapper.map(appointmentRepository.save(appointment), AppointmentResponseDTO.class);
+            responseDTO.setScheduledPerson(appointmentRepository.findById(id).get().getScheduledPerson());
+            return responseDTO;
+
+        } else {
+            throw new AppointmentNotFoundException("Appointment doesn't exist.");
+        }
     }
 
     @Override
