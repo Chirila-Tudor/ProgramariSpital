@@ -2,11 +2,14 @@ package ro.chirila.programarispital.service.implementation;
 
 import org.jvnet.hk2.annotations.Service;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import ro.chirila.programarispital.exception.BadCredentialsException;
 import ro.chirila.programarispital.exception.UserAlreadyDeactivatedException;
 import ro.chirila.programarispital.exception.UserAlreadyExistException;
 import ro.chirila.programarispital.exception.UserNotFoundException;
 import ro.chirila.programarispital.repository.UserRepository;
+import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
 import ro.chirila.programarispital.repository.dto.UserResponseDTO;
 import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
 import ro.chirila.programarispital.repository.entity.User;
@@ -19,11 +22,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
+    @Value("${app.bcrypt.salt}")
+    private String bcryptSalt;
+
     public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
     }
 
+    @Override
     public UserResponseDTO addUser(String username) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new UserAlreadyExistException("User already exist!");
@@ -66,6 +73,25 @@ public class UserServiceImpl implements UserService {
 
         }
         throw new BadCredentialsException("Bad credentials.");
+    }
+
+    @Override
+    public Boolean changePassword(ChangePasswordDTO changePasswordDTO) {
+        String username = changePasswordDTO.username();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
+
+        String hashFrontendNewPassword = BCrypt.hashpw(changePasswordDTO.newPassword(), bcryptSalt);
+        if (!BCrypt.checkpw(changePasswordDTO.oldPassword(), user.getPassword())) {
+            return false;
+        }
+        user.setPassword(hashFrontendNewPassword);
+        userRepository.save(user);
+        return true;
+    }
+
+    @Override
+    public Boolean sendWelcomeEmail(String username) {
+        return null;
     }
 
 
