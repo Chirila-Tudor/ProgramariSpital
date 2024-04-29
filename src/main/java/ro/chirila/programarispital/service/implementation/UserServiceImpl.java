@@ -1,7 +1,9 @@
 package ro.chirila.programarispital.service.implementation;
 
-import org.jvnet.hk2.annotations.Service;
+
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import ro.chirila.programarispital.exception.BadCredentialsException;
 import ro.chirila.programarispital.exception.UserAlreadyDeactivatedException;
 import ro.chirila.programarispital.exception.UserAlreadyExistException;
@@ -19,11 +21,15 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
+    @Value("${app.bcrypt.salt}")
+    private String bcryptSalt;
+
     public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
     }
 
+    @Override
     public UserResponseDTO addUser(String username) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new UserAlreadyExistException("User already exist!");

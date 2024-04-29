@@ -1,7 +1,10 @@
 package ro.chirila.programarispital.repository.dto;
 
-public record UserSecurityDTO(
-        String username,
-        String role
-) {
+import lombok.Data;
+
+@Data
+public class UserSecurityDTO
+{
+    private String username;
+    private String role;
 }

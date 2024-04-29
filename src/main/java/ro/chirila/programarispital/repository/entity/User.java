@@ -2,7 +2,6 @@ package ro.chirila.programarispital.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import org.hibernate.validator.constraints.UniqueElements;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +98,7 @@ public class User {
     @Column(name = "id_person")
     private Long id;
 
-    @UniqueElements
+    @Column(unique = true)
     private String username;
 
     private String password;
