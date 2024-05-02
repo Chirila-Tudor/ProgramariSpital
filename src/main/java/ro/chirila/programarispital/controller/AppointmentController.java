@@ -10,8 +10,8 @@ import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
 import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
 import ro.chirila.programarispital.service.AppointmentService;
 import ro.chirila.programarispital.service.SendEmailService;
-
 import java.util.concurrent.CompletableFuture;
+
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -25,6 +25,7 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
         this.sendEmailService = sendEmailService;
     }
+  
     @PostMapping("/create-appointment")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> addAppointment(@RequestBody AppointmentRequestDTO appointmentRequestDTO
