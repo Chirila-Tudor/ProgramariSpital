@@ -24,13 +24,19 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.session:spring-session-core")
-    implementation ("org.modelmapper:modelmapper:2.3.8")
+    implementation("org.modelmapper:modelmapper:2.3.8")
     implementation("org.springframework.boot:spring-boot-starter-validation:3.2.0")
-    implementation ("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.freemarker:freemarker:2.3.32")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+    annotationProcessor("org.projectlombok:lombok")
+
 
 }
 

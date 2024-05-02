@@ -1,21 +1,19 @@
 package ro.chirila.programarispital.repository.dto;
 
+import lombok.Data;
 import ro.chirila.programarispital.repository.entity.PeriodOfAppointment;
 
-import java.time.LocalTime;
-import java.util.Date;
 import java.util.List;
-
-public record AppointmentUpdateDTO(
-        String email,
-        String firstName,
-        String lastName,
-        String phoneNumber,
-        Date dateOfBirth,
-        Date chooseDate,
-        LocalTime appointmentHour,
-        PeriodOfAppointment periodOfAppointment,
-        List<TypeOfServiceDTO> typeOfService
-
-) {
+@Data
+public class AppointmentUpdateDTO
+{
+    private String email;
+    private String firstName;
+    private String lastName;
+    private String phoneNumber;
+    private String dateOfBirth;
+    private String chooseDate;
+    private String appointmentHour;
+    private PeriodOfAppointment periodOfAppointment;
+    private List<TypeOfServiceDTO> typeOfService;
 }

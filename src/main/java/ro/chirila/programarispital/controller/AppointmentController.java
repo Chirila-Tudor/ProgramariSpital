@@ -1,3 +1,4 @@
+
 package ro.chirila.programarispital.controller;
 
 import jakarta.transaction.Transactional;
@@ -8,6 +9,9 @@ import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
 import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
 import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
 import ro.chirila.programarispital.service.AppointmentService;
+import ro.chirila.programarispital.service.SendEmailService;
+import java.util.concurrent.CompletableFuture;
+
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -15,15 +19,21 @@ import ro.chirila.programarispital.service.AppointmentService;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final SendEmailService sendEmailService;
 
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, SendEmailService sendEmailService) {
         this.appointmentService = appointmentService;
+        this.sendEmailService = sendEmailService;
     }
+  
     @PostMapping("/create-appointment")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> addAppointment(@RequestBody AppointmentRequestDTO appointmentRequestDTO
-                                                                    , @RequestParam String username){
-        return new ResponseEntity<>(appointmentService.addAppointment(appointmentRequestDTO,username), HttpStatus.OK);
+            , @RequestParam String username){
+
+        AppointmentResponseDTO appointmentResponseDTO = appointmentService.addAppointment(appointmentRequestDTO,username);
+        CompletableFuture.runAsync(() -> sendEmailService.sendAppointmentEmail(appointmentResponseDTO));
+        return new ResponseEntity<>(appointmentResponseDTO, HttpStatus.OK);
     }
 
     @PatchMapping("/update")

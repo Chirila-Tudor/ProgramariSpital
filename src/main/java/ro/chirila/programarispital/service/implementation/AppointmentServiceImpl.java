@@ -1,9 +1,8 @@
 package ro.chirila.programarispital.service.implementation;
 
-import org.jvnet.hk2.annotations.Service;
 import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
 import ro.chirila.programarispital.exception.AppointmentNotFoundException;
-import ro.chirila.programarispital.exception.UserNotFoundException;
 import ro.chirila.programarispital.repository.AppointmentRepository;
 import ro.chirila.programarispital.repository.TypeOfServiceRepository;
 import ro.chirila.programarispital.repository.UserRepository;
@@ -17,8 +16,8 @@ import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.AppointmentService;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -39,20 +38,29 @@ public class AppointmentServiceImpl implements AppointmentService {
     public AppointmentResponseDTO addAppointment(AppointmentRequestDTO appointment, String username) {
         Appointment savedAppointment = new Appointment();
 
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("No user found by this username"));
-
-        savedAppointment.setScheduledPerson(user);
-        savedAppointment.setEmail(appointment.email());
-        savedAppointment.setFirstName(appointment.firstName());
-        savedAppointment.setLastName(appointment.lastName());
-        savedAppointment.setPhoneNumber(appointment.phoneNumber());
-        savedAppointment.setDateOfBirth(new Date());
-        savedAppointment.setChooseDate(new Date());
-        savedAppointment.setAppointmentHour(appointment.appointmentHour());
-        savedAppointment.setPeriodOfAppointment(appointment.periodOfAppointment());
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        User newUser = null;
+        if(optionalUser.isEmpty()){
+            newUser = new User();
+            newUser.setUsername(username);
+            newUser.setHasPassword(false);
+            newUser.setActive(false);
+            userRepository.save(newUser);
+            savedAppointment.setScheduledPerson(newUser);
+        }else{
+            savedAppointment.setScheduledPerson(optionalUser.get());
+        }
+        savedAppointment.setEmail(appointment.getEmail());
+        savedAppointment.setFirstName(appointment.getFirstName());
+        savedAppointment.setLastName(appointment.getLastName());
+        savedAppointment.setPhoneNumber(appointment.getPhoneNumber());
+        savedAppointment.setDateOfBirth(appointment.getDateOfBirth());
+        savedAppointment.setChooseDate(appointment.getChooseDate());
+        savedAppointment.setAppointmentHour(appointment.getAppointmentHour());
+        savedAppointment.setPeriodOfAppointment(appointment.getPeriodOfAppointment());
         savedAppointment.setTypeOfServices(new ArrayList<>());
 
-        for (TypeOfServiceDTO typeOfServiceDTO : appointment.typeOfServices()) {
+        for (TypeOfServiceDTO typeOfServiceDTO : appointment.getTypeOfServices()) {
             TypeOfService typeOfService = typeOfServiceRepository.findByService(modelMapper.map(typeOfServiceDTO, TypeOfService.class).getService());
 
             if (typeOfService == null) {
@@ -62,11 +70,18 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
         }
 
-        user.getAppointments().add(savedAppointment);
+        if(optionalUser.isEmpty()){
+            newUser.getAppointments().add(savedAppointment);
+        }else {
+            optionalUser.get().getAppointments().add(savedAppointment);
+        }
+        return modelMapper.map(appointmentRepository.save(savedAppointment), AppointmentResponseDTO.class);
+        /*appointmentRepository.save(savedAppointment);
+         return new AppointmentResponseDTO(savedAppointment.getId(),savedAppointment.getEmail(), savedAppointment.getFirstName(),
+                savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(),savedAppointment.getChooseDate(),savedAppointment.getAppointmentHour(),
+                savedAppointment.getPeriodOfAppointment(), savedAppointment.getTypeOfServices().stream().map(typeOfService -> new TypeOfServiceDTO(typeOfService.getService())).toList(),
+                savedAppointment.getScheduledPerson().getUsername());*/
 
-        AppointmentResponseDTO responseDTO = modelMapper.map(appointmentRepository.save(savedAppointment), AppointmentResponseDTO.class);
-        responseDTO.setScheduledPerson(user);
-        return responseDTO;
     }
 
     @Override
@@ -74,43 +89,43 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (appointmentRepository.findById(id).isPresent()) {
             Appointment appointment = appointmentRepository.findById(id).get();
 
-            if (appointmentUpdateDTO.email() != null) {
-                appointment.setEmail(appointmentUpdateDTO.email());
+            if (appointmentUpdateDTO.getEmail() != null) {
+                appointment.setEmail(appointmentUpdateDTO.getEmail());
             }
-            if (appointmentUpdateDTO.firstName() != null) {
-                appointment.setFirstName(appointmentUpdateDTO.firstName());
+            if (appointmentUpdateDTO.getEmail() != null) {
+                appointment.setFirstName(appointmentUpdateDTO.getFirstName());
             }
-            if (appointmentUpdateDTO.lastName() != null) {
-                appointment.setLastName(appointmentUpdateDTO.lastName());
+            if (appointmentUpdateDTO.getLastName() != null) {
+                appointment.setLastName(appointmentUpdateDTO.getLastName());
             }
-            if (appointmentUpdateDTO.phoneNumber() != null) {
-                appointment.setPhoneNumber(appointmentUpdateDTO.phoneNumber());
+            if (appointmentUpdateDTO.getPhoneNumber() != null) {
+                appointment.setPhoneNumber(appointmentUpdateDTO.getPhoneNumber());
             }
-            if (appointmentUpdateDTO.dateOfBirth() != null) {
-                appointment.setDateOfBirth(appointmentUpdateDTO.dateOfBirth());
+            if (appointmentUpdateDTO.getDateOfBirth() != null) {
+                appointment.setDateOfBirth(appointmentUpdateDTO.getDateOfBirth());
             }
-            if (appointmentUpdateDTO.chooseDate() != null) {
-                appointment.setChooseDate(appointmentUpdateDTO.chooseDate());
+            if (appointmentUpdateDTO.getChooseDate() != null) {
+                appointment.setChooseDate(appointmentUpdateDTO.getChooseDate());
             }
-            if (appointmentUpdateDTO.appointmentHour() != null) {
-                appointment.setAppointmentHour(appointmentUpdateDTO.appointmentHour());
+            if (appointmentUpdateDTO.getAppointmentHour() != null) {
+                appointment.setAppointmentHour(appointmentUpdateDTO.getAppointmentHour());
             }
-            if (appointmentUpdateDTO.periodOfAppointment() != null) {
-                appointment.setPeriodOfAppointment(appointmentUpdateDTO.periodOfAppointment());
+            if (appointmentUpdateDTO.getAppointmentHour() != null) {
+                appointment.setPeriodOfAppointment(appointmentUpdateDTO.getPeriodOfAppointment());
             }
 
-            if (appointmentUpdateDTO.typeOfService() != null) {
-                if (appointmentUpdateDTO.typeOfService().isEmpty()) {
+            if (appointmentUpdateDTO.getTypeOfService() != null) {
+                if (appointmentUpdateDTO.getTypeOfService().isEmpty()) {
                     throw new RuntimeException("Please select at least one type of service.");
                 }
                 List<TypeOfService> newTypeOfServiceList = new ArrayList<>();
 
-                for (TypeOfServiceDTO typeOfServiceDTO : appointmentUpdateDTO.typeOfService()) {
+                for (TypeOfServiceDTO typeOfServiceDTO : appointmentUpdateDTO.getTypeOfService()) {
 
-                    TypeOfService newTypeOfService = typeOfServiceRepository.findByService(typeOfServiceDTO.service());
+                    TypeOfService newTypeOfService = typeOfServiceRepository.findByService(typeOfServiceDTO.getService());
                     if (newTypeOfService == null) {
                         TypeOfService addedTypeOfService = new TypeOfService();
-                        addedTypeOfService.setService(typeOfServiceDTO.service());
+                        addedTypeOfService.setService(typeOfServiceDTO.getService());
                         typeOfServiceRepository.save(addedTypeOfService);
                         newTypeOfServiceList.add(addedTypeOfService);
                     } else {
@@ -121,7 +136,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
 
             AppointmentResponseDTO responseDTO = modelMapper.map(appointmentRepository.save(appointment), AppointmentResponseDTO.class);
-            responseDTO.setScheduledPerson(appointmentRepository.findById(id).get().getScheduledPerson());
+            //responseDTO.setScheduledPerson(appointmentRepository.findById(id).get().getScheduledPerson());
             return responseDTO;
 
         } else {
@@ -137,6 +152,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new AppointmentNotFoundException("Appointment doesn't exists.");
         }
     }
+
+
 
 
 }

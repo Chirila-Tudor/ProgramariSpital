@@ -2,8 +2,7 @@ package ro.chirila.programarispital.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import java.time.LocalTime;
-import java.util.Date;
+
 import java.util.List;
 
 @Entity
@@ -11,8 +10,8 @@ import java.util.List;
 public class Appointment {
 
     //region Constructors
-    public Appointment(Long id, String email, String firstName, String lastName, Date dateOfBirth, String phoneNumber, List<TypeOfService> typeOfServices,
-                       Date chooseDate, LocalTime appointmentHour, User scheduledPerson, PeriodOfAppointment periodOfAppointment) {
+    public Appointment(Long id, String email, String firstName, String lastName, String dateOfBirth, String phoneNumber, List<TypeOfService> typeOfServices,
+                       String chooseDate, String appointmentHour, User scheduledPerson, PeriodOfAppointment periodOfAppointment) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -64,11 +63,11 @@ public class Appointment {
         this.lastName = lastName;
     }
 
-    public Date getDateOfBirth() {
+    public String getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Date dateOfBirth) {
+    public void setDateOfBirth(String dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -88,19 +87,19 @@ public class Appointment {
         this.typeOfServices = typeOfServices;
     }
 
-    public Date getChooseDate() {
+    public String getChooseDate() {
         return chooseDate;
     }
 
-    public void setChooseDate(Date chooseDate) {
+    public void setChooseDate(String chooseDate) {
         this.chooseDate = chooseDate;
     }
 
-    public LocalTime getAppointmentHour() {
+    public String getAppointmentHour() {
         return appointmentHour;
     }
 
-    public void setAppointmentHour(LocalTime appointmentHour) {
+    public void setAppointmentHour(String appointmentHour) {
         this.appointmentHour = appointmentHour;
     }
 
@@ -130,9 +129,9 @@ public class Appointment {
     private String firstName;
     private String lastName;
     private String phoneNumber;
-    private Date dateOfBirth;
-    private Date chooseDate;
-    private LocalTime appointmentHour;
+    private String dateOfBirth;
+    private String chooseDate;
+    private String appointmentHour;
     private PeriodOfAppointment periodOfAppointment;
 
     @ManyToMany(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)

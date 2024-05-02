@@ -1,8 +1,9 @@
 package ro.chirila.programarispital.service.implementation;
 
-import org.jvnet.hk2.annotations.Service;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import ro.chirila.programarispital.exception.BadCredentialsException;
 import ro.chirila.programarispital.exception.UserAlreadyDeactivatedException;
@@ -74,25 +75,4 @@ public class UserServiceImpl implements UserService {
         }
         throw new BadCredentialsException("Bad credentials.");
     }
-
-    @Override
-    public Boolean changePassword(ChangePasswordDTO changePasswordDTO) {
-        String username = changePasswordDTO.username();
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
-
-        String hashFrontendNewPassword = BCrypt.hashpw(changePasswordDTO.newPassword(), bcryptSalt);
-        if (!BCrypt.checkpw(changePasswordDTO.oldPassword(), user.getPassword())) {
-            return false;
-        }
-        user.setPassword(hashFrontendNewPassword);
-        userRepository.save(user);
-        return true;
-    }
-
-    @Override
-    public Boolean sendWelcomeEmail(String username) {
-        return null;
-    }
-
-
 }

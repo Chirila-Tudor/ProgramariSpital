@@ -1,4 +1,8 @@
 package ro.chirila.programarispital.repository.dto;
 
-public record TypeOfServiceDTO(String service) {
+import lombok.Data;
+
+@Data
+public class TypeOfServiceDTO {
+    private String service;
 }
