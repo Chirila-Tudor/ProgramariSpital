@@ -44,7 +44,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             newUser = new User();
             newUser.setUsername(username);
             newUser.setHasPassword(false);
-            newUser.setActive(false);
+            newUser.setIsActive(false);
             userRepository.save(newUser);
             savedAppointment.setScheduledPerson(newUser);
         }else{

@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
 import ro.chirila.programarispital.repository.dto.UserResponseDTO;
 import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
 import ro.chirila.programarispital.service.UserService;
@@ -38,6 +39,15 @@ public class UserController {
     @DeleteMapping
     public ResponseEntity<Boolean> deleteUser(@RequestBody String username){
         return new ResponseEntity<>(userService.deleteUser(username), HttpStatus.OK);
+    }
+    @Transactional
+    @PostMapping("/change-password")
+    public ResponseEntity<Object> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO){
+        boolean passwordChanged = userService.changePassword(changePasswordDTO);
+        if(passwordChanged){
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 }
