@@ -4,19 +4,22 @@ package ro.chirila.programarispital.service.implementation;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import ro.chirila.programarispital.exception.BadCredentialsException;
 import ro.chirila.programarispital.exception.UserAlreadyDeactivatedException;
 import ro.chirila.programarispital.exception.UserAlreadyExistException;
 import ro.chirila.programarispital.exception.UserNotFoundException;
 import ro.chirila.programarispital.repository.UserRepository;
-import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
+import ro.chirila.programarispital.repository.dto.UserExistsDTO;
 import ro.chirila.programarispital.repository.dto.UserResponseDTO;
 import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
+import ro.chirila.programarispital.repository.entity.Role;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.UserService;
 
 import java.util.Optional;
+
+import static ro.chirila.programarispital.utils.PasswordGenerator.generatePassword;
+import static ro.chirila.programarispital.utils.PasswordGenerator.hashPassword;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -38,8 +41,8 @@ public class UserServiceImpl implements UserService {
         }
         User user = new User();
         user.setUsername(username);
-        user.setHasPassword(false);
-        user.setActive(false);
+        user.setHasPassword(true);
+        user.setIsActive(true);
         userRepository.save(user);
         return modelMapper.map(user, UserResponseDTO.class);
     }
@@ -53,7 +56,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Boolean deleteUser(String username) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
-        if (user.getActive()) {
+        if (user.getIsActive()) {
             return false;
         }
         userRepository.delete(user);
@@ -65,14 +68,32 @@ public class UserServiceImpl implements UserService {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            if (user.getActive() && password.equals(user.getPassword())) {
+            // TODO remove hashPassword after adding hashing in UI
+            if (user.getIsActive() && hashPassword(password).equals(user.getPassword())) {
                 return modelMapper.map(user, UserSecurityDTO.class);
             }
-            if (!user.getActive() && password.equals(user.getPassword())) {
+            if (!user.getIsActive() && password.equals(user.getPassword())) {
                 throw new UserAlreadyDeactivatedException("User was deactivated");
             }
 
         }
         throw new BadCredentialsException("Bad credentials.");
     }
+
+    @Override
+    public UserExistsDTO getUserExistByUsername(String username) {
+        Optional<User> user = userRepository.findByUsername(username);
+        UserExistsDTO newUser = null;
+        String password = "";
+        if(user.isEmpty()){
+            password = generatePassword(12);
+            newUser = new UserExistsDTO(username, hashPassword(password) , true,true, Role.PATIENT);
+            userRepository.save(modelMapper.map(newUser, User.class));
+            newUser.setPassword(password);
+        }
+        return newUser;
+    }
+
+
+
 }

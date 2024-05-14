@@ -2,10 +2,15 @@ package ro.chirila.programarispital.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Setter
+@Getter
 @Entity
-@Table
+@Table(name = "typeOfService")
 public class TypeOfService {
 
     //region Constructors
@@ -19,45 +24,11 @@ public class TypeOfService {
 
     }
     //endregion
-
-    //region Getter and setter
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getService() {
-        return service;
-    }
-
-    public void setService(String service) {
-        this.service = service;
-    }
-
-    public List<Appointment> getAppointmentList() {
-        return appointmentList;
-    }
-
-    public void setAppointmentList(List<Appointment> appointmentList) {
-        this.appointmentList = appointmentList;
-    }
-
-    public List<User> getDoctorsWhoCanPerformService() {
-        return doctorsWhoCanPerformService;
-    }
-
-    public void setDoctorsWhoCanPerformService(List<User> doctors) {
-        this.doctorsWhoCanPerformService = doctors;
-    }
-    //endregion
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_service")
     private Long id;
+
     private String service;
 
     @ManyToMany(mappedBy = "typeOfServices")
