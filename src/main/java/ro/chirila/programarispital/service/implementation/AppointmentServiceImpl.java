@@ -45,9 +45,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         if(optionalUser.isEmpty()){
             newUser = new User();
             newUser.setUsername(username);
-            newUser.setHasPassword(true);
-            newUser.setIsActive(true);
-            newUser.setRole(Role.PATIENT);
+            newUser.setHasPassword(false);
+            newUser.setIsActive(false);
+            userRepository.save(newUser);
             savedAppointment.setScheduledPerson(newUser);
         }else{
             savedAppointment.setScheduledPerson(optionalUser.get());

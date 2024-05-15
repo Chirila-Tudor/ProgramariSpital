@@ -9,6 +9,7 @@ import ro.chirila.programarispital.exception.UserAlreadyDeactivatedException;
 import ro.chirila.programarispital.exception.UserAlreadyExistException;
 import ro.chirila.programarispital.exception.UserNotFoundException;
 import ro.chirila.programarispital.repository.UserRepository;
+import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
 import ro.chirila.programarispital.repository.dto.UserExistsDTO;
 import ro.chirila.programarispital.repository.dto.UserResponseDTO;
 import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
@@ -17,7 +18,7 @@ import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.UserService;
 
 import java.util.Optional;
-
+import static ro.chirila.programarispital.utils.PasswordGenerator.*;
 import static ro.chirila.programarispital.utils.PasswordGenerator.generatePassword;
 import static ro.chirila.programarispital.utils.PasswordGenerator.hashPassword;
 
@@ -87,13 +88,29 @@ public class UserServiceImpl implements UserService {
         String password = "";
         if(user.isEmpty()){
             password = generatePassword(12);
-            newUser = new UserExistsDTO(username, hashPassword(password) , true,true, Role.PATIENT);
+            newUser = new UserExistsDTO(username, hashPassword(password) , true,true, Role.PATIENT,true);
             userRepository.save(modelMapper.map(newUser, User.class));
             newUser.setPassword(password);
         }
         return newUser;
     }
 
+    @Override
+    public boolean changePassword(ChangePasswordDTO changePasswordDTO) {
+
+        String username = changePasswordDTO.getUsername();
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
+        String hashFrontEndPassword = hashPassword(changePasswordDTO.getNewPassword());
+
+        if(!verifyPassword(changePasswordDTO.getOldPassword(), user.getPassword())){
+            return false;
+        }
+        user.setPassword(hashFrontEndPassword);
+        user.setIsFirstLogin(false);
+        userRepository.save(user);
+        return true;
+
+    }
 
 
 }

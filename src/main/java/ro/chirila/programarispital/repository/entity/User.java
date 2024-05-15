@@ -2,6 +2,7 @@ package ro.chirila.programarispital.repository.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "person")
+@Data
 @Setter
 @Getter
 public class User {
@@ -30,6 +32,7 @@ public class User {
     public User() {
     }
     //endregion
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id_person")
@@ -45,6 +48,8 @@ public class User {
     private Role role;
 
     private Boolean isActive;
+
+    private Boolean isFirstLogin;
 
     @JsonIgnoreProperties("scheduledPerson")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "scheduledPerson")

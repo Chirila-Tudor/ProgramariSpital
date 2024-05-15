@@ -1,8 +1,11 @@
 package ro.chirila.programarispital.repository.dto;
 
-public record ChangePasswordDTO(
-        String username,
-        String oldPassword,
-        String newPassword) {
+import lombok.Data;
+
+@Data
+public class ChangePasswordDTO{
+        private String username;
+        private String oldPassword;
+        private String newPassword;
 
 }

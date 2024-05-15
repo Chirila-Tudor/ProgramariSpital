@@ -45,4 +45,8 @@ public class PasswordGenerator {
             return null;
         }
     }
+    public static boolean verifyPassword(String rawPassword, String hashedPassword) {
+        String hashedInput = hashPassword(rawPassword);
+        return hashedInput != null && hashedInput.equals(hashedPassword);
+    }
 }
