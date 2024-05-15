@@ -18,8 +18,9 @@ import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.UserService;
 
 import java.util.Optional;
-
 import static ro.chirila.programarispital.utils.PasswordGenerator.*;
+import static ro.chirila.programarispital.utils.PasswordGenerator.generatePassword;
+import static ro.chirila.programarispital.utils.PasswordGenerator.hashPassword;
 
 @Service
 public class UserServiceImpl implements UserService {

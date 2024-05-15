@@ -15,4 +15,5 @@ public interface UserService {
     UserSecurityDTO login(String username, String password);
     UserExistsDTO getUserExistByUsername(String username);
     boolean changePassword(ChangePasswordDTO changePasswordDTO);
+
 }

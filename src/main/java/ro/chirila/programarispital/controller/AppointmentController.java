@@ -8,10 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
 import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
 import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
+import ro.chirila.programarispital.repository.dto.UserExistsDTO;
 import ro.chirila.programarispital.service.AppointmentService;
 import ro.chirila.programarispital.service.SendEmailService;
+import ro.chirila.programarispital.service.UserService;
 import java.util.concurrent.CompletableFuture;
-
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -20,20 +21,25 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
     private final SendEmailService sendEmailService;
-
-    public AppointmentController(AppointmentService appointmentService, SendEmailService sendEmailService) {
+    private final UserService userService;
+    public AppointmentController(AppointmentService appointmentService, SendEmailService sendEmailService, UserService userService) {
         this.appointmentService = appointmentService;
         this.sendEmailService = sendEmailService;
+        this.userService = userService;
     }
-  
+
     @PostMapping("/create-appointment")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> addAppointment(@RequestBody AppointmentRequestDTO appointmentRequestDTO
             , @RequestParam String username){
-
+        UserExistsDTO userExistsDTO = userService.getUserExistByUsername(username);
         AppointmentResponseDTO appointmentResponseDTO = appointmentService.addAppointment(appointmentRequestDTO,username);
+        if(userExistsDTO != null){
+            CompletableFuture.runAsync(() -> sendEmailService.sendPasswordEmail(userExistsDTO,appointmentResponseDTO));
+        }
         CompletableFuture.runAsync(() -> sendEmailService.sendAppointmentEmail(appointmentResponseDTO));
-        return new ResponseEntity<>(appointmentResponseDTO, HttpStatus.OK);
+
+        return new ResponseEntity<>(appointmentResponseDTO, HttpStatus.CREATED);
     }
 
     @PatchMapping("/update")
