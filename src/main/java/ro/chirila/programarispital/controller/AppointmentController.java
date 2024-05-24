@@ -12,6 +12,8 @@ import ro.chirila.programarispital.repository.dto.UserExistsDTO;
 import ro.chirila.programarispital.service.AppointmentService;
 import ro.chirila.programarispital.service.SendEmailService;
 import ro.chirila.programarispital.service.UserService;
+
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -53,5 +55,16 @@ public class AppointmentController {
     public ResponseEntity<String> deleteAppointment(@RequestParam Long id){
         appointmentService.deleteAppointmentById(id);
         return new ResponseEntity<>("Appointment successfully deleted!", HttpStatus.OK);
+    }
+
+    @Transactional
+    @GetMapping("/get-all-appointments")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAllAppointments() {
+        return new ResponseEntity<>(appointmentService.getAllAppointments(), HttpStatus.OK);
+    }
+    @Transactional
+    @GetMapping("/future-appointments")
+    public ResponseEntity<List<AppointmentRequestDTO>> getAllFutureAppointments() {
+        return new ResponseEntity<>(appointmentService.getAllFutureAppointments(), HttpStatus.OK);
     }
 }

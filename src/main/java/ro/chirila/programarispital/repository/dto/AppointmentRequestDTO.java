@@ -17,5 +17,4 @@ public class AppointmentRequestDTO
     @NotBlank(message = "Please choose the appointment hour.") private String appointmentHour;
     @NotBlank(message = "Please choose the period of time.") private PeriodOfAppointment periodOfAppointment;
     @NotBlank(message = "Please choose the type of service.") private List<TypeOfServiceDTO> typeOfServices;
-    Long scheduledPersonI;
 }

@@ -51,6 +51,8 @@ public class User {
 
     private Boolean isFirstLogin;
 
+    private String securityCode;
+
     @JsonIgnoreProperties("scheduledPerson")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "scheduledPerson")
     private List<Appointment> appointments = new ArrayList<>();

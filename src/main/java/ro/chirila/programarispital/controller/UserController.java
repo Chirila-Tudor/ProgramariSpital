@@ -6,10 +6,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
-import ro.chirila.programarispital.repository.dto.UserResponseDTO;
-import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
+import ro.chirila.programarispital.repository.dto.*;
 import ro.chirila.programarispital.service.UserService;
+
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -49,5 +49,32 @@ public class UserController {
         }
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
+    @Transactional
+    @GetMapping("/is-first-login")
+    public ResponseEntity<Boolean> isFirstLogin(@RequestParam(name = "username") String username) {
+        return new ResponseEntity<>(userService.isFirstLogin(username), HttpStatus.OK);
+    }
+    @Transactional
+    @GetMapping("/get-all-users")
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return new ResponseEntity<>(userService.getAllUsersForAdmin(), HttpStatus.OK);
+    }
+    @Transactional
+    @PostMapping("/modify-user-activity")
+    public ResponseEntity<Boolean> modifyUserActivity(@RequestParam(name = "id") Long id){
+        return new ResponseEntity<>(userService.modifyUserActivity(id), HttpStatus.OK);
+    }
+    @Transactional
+    @PutMapping("/forgot-password")
+    public ResponseEntity<Boolean> requestNewPassword(@RequestParam("username") String username) {
+        return new ResponseEntity<>(userService.forgotPassword(username), HttpStatus.OK);
+    }
+    @Transactional
+    @PostMapping("/request-password")
+    public ResponseEntity<Boolean> requestPassword(@RequestParam("username") String username,
+                                                   @RequestBody String securityCode) {
+        return new ResponseEntity<>(userService.requestNewPassword(username, securityCode), HttpStatus.OK);
+    }
+
 
 }
