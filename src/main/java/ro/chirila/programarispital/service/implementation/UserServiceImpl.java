@@ -84,9 +84,9 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findByUsername(username);
         UserExistsDTO newUser = null;
         String password = "";
-        if(user.isEmpty()){
+        if (user.isEmpty()) {
             password = generatePassword(12);
-            newUser = new UserExistsDTO(username, hashPassword(password) , true,true, Role.PATIENT,true);
+            newUser = new UserExistsDTO(username, hashPassword(password), true, true, Role.PATIENT, true);
             userRepository.save(modelMapper.map(newUser, User.class));
             newUser.setPassword(password);
         }
@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
         String hashFrontEndPassword = hashPassword(changePasswordDTO.getNewPassword());
 
-        if(!verifyPassword(changePasswordDTO.getOldPassword(), user.getPassword())){
+        if (!verifyPassword(changePasswordDTO.getOldPassword(), user.getPassword())) {
             return false;
         }
         user.setPassword(hashFrontEndPassword);

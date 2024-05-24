@@ -20,9 +20,11 @@ public class TypeOfService {
         this.appointmentList = appointmentList;
         this.doctorsWhoCanPerformService = doctors;
     }
+
     public TypeOfService() {
 
     }
+
     //endregion
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

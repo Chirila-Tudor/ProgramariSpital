@@ -16,6 +16,7 @@ public interface AppointmentService {
     void deleteAppointmentById(Long id);
 
     List<AppointmentResponseDTO> getAllAppointments();
+
     List<AppointmentRequestDTO> getAllFutureAppointments();
 
 

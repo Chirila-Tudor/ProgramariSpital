@@ -10,8 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AppointmentResponseDTO
-{
+public class AppointmentResponseDTO {
     private String email;
     private String firstName;
     private String lastName;

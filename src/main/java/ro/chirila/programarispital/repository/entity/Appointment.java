@@ -28,6 +28,7 @@ public class Appointment {
         this.scheduledPerson = scheduledPerson;
         this.periodOfAppointment = periodOfAppointment;
     }
+
     public Appointment() {
 
     }
@@ -60,7 +61,6 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "id_person", referencedColumnName = "id_person")
     private User scheduledPerson;
-
 
 
 }

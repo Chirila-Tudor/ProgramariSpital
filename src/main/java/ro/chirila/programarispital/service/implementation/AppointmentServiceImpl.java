@@ -43,14 +43,14 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Optional<User> optionalUser = userRepository.findByUsername(username);
         User newUser = null;
-        if(optionalUser.isEmpty()){
+        if (optionalUser.isEmpty()) {
             newUser = new User();
             newUser.setUsername(username);
             newUser.setHasPassword(false);
             newUser.setIsActive(false);
             userRepository.save(newUser);
             savedAppointment.setScheduledPerson(newUser);
-        }else{
+        } else {
             savedAppointment.setScheduledPerson(optionalUser.get());
         }
         savedAppointment.setEmail(appointment.getEmail());
@@ -72,14 +72,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                 savedAppointment.getTypeOfServices().add(typeOfService);
             }
         }
-        if(optionalUser.isEmpty()){
+        if (optionalUser.isEmpty()) {
             newUser.getAppointments().add(savedAppointment);
-        }else {
+        } else {
             optionalUser.get().getAppointments().add(savedAppointment);
         }
         appointmentRepository.save(savedAppointment);
-         return new AppointmentResponseDTO(savedAppointment.getEmail(), savedAppointment.getFirstName(),
-                savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(),savedAppointment.getChooseDate(),savedAppointment.getAppointmentHour(),
+        return new AppointmentResponseDTO(savedAppointment.getEmail(), savedAppointment.getFirstName(),
+                savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(), savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour(),
                 savedAppointment.getPeriodOfAppointment(), savedAppointment.getTypeOfServices().stream().map(typeOfService -> new TypeOfServiceDTO(typeOfService.getService())).toList(),
                 savedAppointment.getScheduledPerson().getUsername());
 

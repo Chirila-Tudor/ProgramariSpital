@@ -8,6 +8,8 @@ import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
 @Service
 public interface SendEmailService {
     void sendAppointmentEmail(AppointmentResponseDTO appointment);
+
     void sendPasswordEmail(UserExistsDTO userExistsDTO, AppointmentResponseDTO appointment);
+
     void sendForgotPasswordEmail(UserSecurityDTO userSecurityDTO);
 }

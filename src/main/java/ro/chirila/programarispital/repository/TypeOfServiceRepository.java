@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import ro.chirila.programarispital.repository.entity.TypeOfService;
 
 @Repository
-public interface TypeOfServiceRepository extends JpaRepository<TypeOfService,Long> {
+public interface TypeOfServiceRepository extends JpaRepository<TypeOfService, Long> {
     TypeOfService findByService(String service);
 }
