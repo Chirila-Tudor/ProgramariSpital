@@ -6,10 +6,14 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ro.chirila.programarispital.exception.UserAlreadyExistException;
 import ro.chirila.programarispital.repository.dto.*;
+import ro.chirila.programarispital.repository.entity.Role;
+import ro.chirila.programarispital.service.SendEmailService;
 import ro.chirila.programarispital.service.UserService;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -17,15 +21,33 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final SendEmailService sendEmailService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, SendEmailService sendEmailService) {
         this.userService = userService;
+        this.sendEmailService = sendEmailService;
     }
 
     @Transactional
     @PostMapping("/addUser")
-    public ResponseEntity<UserResponseDTO> addUser(@RequestParam(name = "username") String username) {
-        return new ResponseEntity<>(userService.addUser(username), HttpStatus.CREATED);
+    public ResponseEntity<UserResponseDTO> addUser(@RequestBody UserRequestDTO userRequest) {
+        String username = userRequest.getUsername();
+        Role role = userRequest.getRole();
+        String email = userRequest.getEmail();
+
+        UserResponseDTO userResponseDTO;
+        try {
+            userResponseDTO = userService.addUser(username, role, email);
+        } catch (UserAlreadyExistException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
+        UserExistsDTO userExistsDTO = userService.setPasswordForUser(username, role);
+        if (userExistsDTO != null) {
+            CompletableFuture.runAsync(() -> sendEmailService.sendPasswordForHospitalPersonal(userExistsDTO, userRequest));
+        }
+
+        return new ResponseEntity<>(userResponseDTO, HttpStatus.CREATED);
     }
 
     @Transactional

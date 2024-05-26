@@ -2,13 +2,17 @@ package ro.chirila.programarispital.service;
 
 
 import org.springframework.stereotype.Service;
-import ro.chirila.programarispital.repository.dto.*;
+import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
+import ro.chirila.programarispital.repository.dto.UserExistsDTO;
+import ro.chirila.programarispital.repository.dto.UserResponseDTO;
+import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
+import ro.chirila.programarispital.repository.entity.Role;
 
 import java.util.List;
 
 @Service
 public interface UserService {
-    UserResponseDTO addUser(String username);
+    UserResponseDTO addUser(String username, Role role, String email);
 
     UserResponseDTO getUserByUsername(String username);
 
@@ -16,7 +20,9 @@ public interface UserService {
 
     UserSecurityDTO login(String username, String password);
 
-    UserExistsDTO getUserExistByUsername(String username);
+    UserExistsDTO setPasswordForPatient(String username);
+
+    UserExistsDTO setPasswordForUser(String username, Role role);
 
     Boolean changePassword(ChangePasswordDTO changePasswordDTO);
 

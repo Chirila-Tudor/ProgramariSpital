@@ -34,14 +34,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO addUser(String username) {
+    public UserResponseDTO addUser(String username, Role role, String email) {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new UserAlreadyExistException("User already exist!");
         }
         User user = new User();
         user.setUsername(username);
-        user.setHasPassword(true);
-        user.setIsActive(true);
+        user.setHasPassword(false);
+        user.setIsActive(false);
+        user.setRole(role);
+        user.setEmail(email);
         userRepository.save(user);
         return modelMapper.map(user, UserResponseDTO.class);
     }
@@ -80,7 +82,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserExistsDTO getUserExistByUsername(String username) {
+    public UserExistsDTO setPasswordForPatient(String username) {
         Optional<User> user = userRepository.findByUsername(username);
         UserExistsDTO newUser = null;
         String password = "";
@@ -91,6 +93,26 @@ public class UserServiceImpl implements UserService {
             newUser.setPassword(password);
         }
         return newUser;
+    }
+
+    @Override
+    public UserExistsDTO setPasswordForUser(String username, Role role) {
+        Optional<User> userOptional = userRepository.findByUsername(username);
+        if (userOptional.isEmpty()) {
+            return null;
+        }
+        User user = userOptional.get();
+        String password = generatePassword(12);
+        user.setPassword(hashPassword(password));
+        user.setHasPassword(true);
+        user.setIsFirstLogin(true);
+        user.setIsActive(true);
+        userRepository.save(user);
+
+        UserExistsDTO userExistsDTO = modelMapper.map(user, UserExistsDTO.class);
+        userExistsDTO.setPassword(password);
+
+        return userExistsDTO;
     }
 
     @Override
