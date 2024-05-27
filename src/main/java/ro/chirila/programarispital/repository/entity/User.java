@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "person")
+@Table(name = "users")
 @Data
 @Setter
 @Getter
@@ -53,9 +53,15 @@ public class User {
 
     private String securityCode;
 
+    private String email;
+
     @JsonIgnoreProperties("scheduledPerson")
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "scheduledPerson")
     private List<Appointment> appointments = new ArrayList<>();
+
+    @JsonIgnoreProperties("doctor")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "doctor")
+    private List<HospitalHall> hospitalHalls = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(

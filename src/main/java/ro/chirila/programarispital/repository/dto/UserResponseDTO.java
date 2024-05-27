@@ -11,6 +11,7 @@ import java.util.List;
 public class UserResponseDTO {
     private Long id;
     private String username;
+    private String email;
     private Role role;
     private List<Appointment> appointments;
     private List<TypeOfService> services;

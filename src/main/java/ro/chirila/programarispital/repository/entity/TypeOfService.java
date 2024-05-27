@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @Getter
 @Entity
-@Table(name = "typeOfService")
+@Table(name = "typeofservices")
 public class TypeOfService {
 
     //region Constructors

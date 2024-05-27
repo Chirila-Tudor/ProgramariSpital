@@ -11,10 +11,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
-import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
-import ro.chirila.programarispital.repository.dto.TypeOfServiceDTO;
-import ro.chirila.programarispital.repository.dto.UserExistsDTO;
-import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
+import ro.chirila.programarispital.repository.dto.*;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.SendEmailService;
 
@@ -88,6 +85,33 @@ public class SendEmailServiceImpl implements SendEmailService {
             Template template = configuration.getTemplate("send-password.html");
             Map<String, Object> templateMapper = new HashMap<>();
             templateMapper.put("username", appointment.getFirstName());
+            templateMapper.put("password", userExistsDTO.getPassword());
+            templateMapper.put("adminEmail", adminEmail);
+            templateMapper.put("companyName", companyName);
+            String htmlTemplate = FreeMarkerTemplateUtils.processTemplateIntoString(template, templateMapper);
+            helper.setText(htmlTemplate, true);
+            Transport.send(message);
+        } catch (MessagingException | IOException | TemplateException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void sendPasswordForHospitalPersonal(UserExistsDTO userExistsDTO, UserRequestDTO userRequestDTO) {
+        MimeMessage message = new MimeMessage(getSession());
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            User user = new User();
+            user.setPassword(userExistsDTO.getPassword());
+            helper.setFrom(new InternetAddress(adminEmail));
+            helper.setTo(userRequestDTO.getEmail());
+            helper.setSubject("Appointment to " + companyName);
+            Template template = configuration.getTemplate("send-password.html");
+            Map<String, Object> templateMapper = new HashMap<>();
+            templateMapper.put("username", userRequestDTO.getUsername());
             templateMapper.put("password", userExistsDTO.getPassword());
             templateMapper.put("adminEmail", adminEmail);
             templateMapper.put("companyName", companyName);
