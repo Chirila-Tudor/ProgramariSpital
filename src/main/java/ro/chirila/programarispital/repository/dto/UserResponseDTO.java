@@ -6,9 +6,10 @@ import ro.chirila.programarispital.repository.entity.Role;
 import ro.chirila.programarispital.repository.entity.TypeOfService;
 
 import java.util.List;
+
 @Data
-public class UserResponseDTO
-{
+public class UserResponseDTO {
+    private Long id;
     private String username;
     private Role role;
     private List<Appointment> appointments;

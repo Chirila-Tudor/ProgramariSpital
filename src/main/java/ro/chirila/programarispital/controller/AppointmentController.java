@@ -12,6 +12,8 @@ import ro.chirila.programarispital.repository.dto.UserExistsDTO;
 import ro.chirila.programarispital.service.AppointmentService;
 import ro.chirila.programarispital.service.SendEmailService;
 import ro.chirila.programarispital.service.UserService;
+
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -22,6 +24,7 @@ public class AppointmentController {
     private final AppointmentService appointmentService;
     private final SendEmailService sendEmailService;
     private final UserService userService;
+
     public AppointmentController(AppointmentService appointmentService, SendEmailService sendEmailService, UserService userService) {
         this.appointmentService = appointmentService;
         this.sendEmailService = sendEmailService;
@@ -31,11 +34,11 @@ public class AppointmentController {
     @PostMapping("/create-appointment")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> addAppointment(@RequestBody AppointmentRequestDTO appointmentRequestDTO
-            , @RequestParam String username){
+            , @RequestParam String username) {
         UserExistsDTO userExistsDTO = userService.getUserExistByUsername(username);
-        AppointmentResponseDTO appointmentResponseDTO = appointmentService.addAppointment(appointmentRequestDTO,username);
-        if(userExistsDTO != null){
-            CompletableFuture.runAsync(() -> sendEmailService.sendPasswordEmail(userExistsDTO,appointmentResponseDTO));
+        AppointmentResponseDTO appointmentResponseDTO = appointmentService.addAppointment(appointmentRequestDTO, username);
+        if (userExistsDTO != null) {
+            CompletableFuture.runAsync(() -> sendEmailService.sendPasswordEmail(userExistsDTO, appointmentResponseDTO));
         }
         CompletableFuture.runAsync(() -> sendEmailService.sendAppointmentEmail(appointmentResponseDTO));
 
@@ -45,13 +48,26 @@ public class AppointmentController {
     @PatchMapping("/update")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@RequestParam Long id,
-                                                                    @RequestBody AppointmentUpdateDTO appointmentUpdateDTO){
+                                                                    @RequestBody AppointmentUpdateDTO appointmentUpdateDTO) {
         return new ResponseEntity<>(appointmentService.updateAppointment(id, appointmentUpdateDTO), HttpStatus.OK);
     }
+
     @DeleteMapping("/delete-appointment")
     @Transactional
-    public ResponseEntity<String> deleteAppointment(@RequestParam Long id){
+    public ResponseEntity<String> deleteAppointment(@RequestParam Long id) {
         appointmentService.deleteAppointmentById(id);
         return new ResponseEntity<>("Appointment successfully deleted!", HttpStatus.OK);
+    }
+
+    @Transactional
+    @GetMapping("/get-all-appointments")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAllAppointments() {
+        return new ResponseEntity<>(appointmentService.getAllAppointments(), HttpStatus.OK);
+    }
+
+    @Transactional
+    @GetMapping("/future-appointments")
+    public ResponseEntity<List<AppointmentRequestDTO>> getAllFutureAppointments() {
+        return new ResponseEntity<>(appointmentService.getAllFutureAppointments(), HttpStatus.OK);
     }
 }

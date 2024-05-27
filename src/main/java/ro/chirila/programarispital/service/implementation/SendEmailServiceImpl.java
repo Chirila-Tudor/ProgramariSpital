@@ -14,6 +14,7 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
 import ro.chirila.programarispital.repository.dto.TypeOfServiceDTO;
 import ro.chirila.programarispital.repository.dto.UserExistsDTO;
+import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.SendEmailService;
 
@@ -43,11 +44,11 @@ public class SendEmailServiceImpl implements SendEmailService {
     @Override
     public void sendAppointmentEmail(AppointmentResponseDTO appointment) {
         String services = "";
-        for(TypeOfServiceDTO typeOfServiceDTO : appointment.getTypeOfService()){
+        for (TypeOfServiceDTO typeOfServiceDTO : appointment.getTypeOfService()) {
             services += typeOfServiceDTO.getService() + "\n";
         }
         MimeMessage message = new MimeMessage(getSession());
-        try{
+        try {
             MimeMessageHelper helper = new MimeMessageHelper(
                     message,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
@@ -55,7 +56,7 @@ public class SendEmailServiceImpl implements SendEmailService {
             helper.setFrom(new InternetAddress(adminEmail));
             helper.setTo(appointment.getEmail());
             helper.setSubject("Appointment to " + companyName);
-            Template template  = configuration.getTemplate("appointment-mail.html");
+            Template template = configuration.getTemplate("appointment-mail.html");
             Map<String, Object> templateMapper = new HashMap<>();
             templateMapper.put("username", appointment.getFirstName());
             templateMapper.put("appointmentDate", appointment.getChooseDate());
@@ -66,7 +67,7 @@ public class SendEmailServiceImpl implements SendEmailService {
             String htmlTemplate = FreeMarkerTemplateUtils.processTemplateIntoString(template, templateMapper);
             helper.setText(htmlTemplate, true);
             Transport.send(message);
-        }catch (MessagingException | IOException | TemplateException e){
+        } catch (MessagingException | IOException | TemplateException e) {
             throw new RuntimeException(e);
         }
     }
@@ -74,7 +75,7 @@ public class SendEmailServiceImpl implements SendEmailService {
     @Override
     public void sendPasswordEmail(UserExistsDTO userExistsDTO, AppointmentResponseDTO appointment) {
         MimeMessage message = new MimeMessage(getSession());
-        try{
+        try {
             MimeMessageHelper helper = new MimeMessageHelper(
                     message,
                     MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
@@ -84,7 +85,7 @@ public class SendEmailServiceImpl implements SendEmailService {
             helper.setFrom(new InternetAddress(adminEmail));
             helper.setTo(appointment.getEmail());
             helper.setSubject("Appointment to " + companyName);
-            Template template  = configuration.getTemplate("send-password.html");
+            Template template = configuration.getTemplate("send-password.html");
             Map<String, Object> templateMapper = new HashMap<>();
             templateMapper.put("username", appointment.getFirstName());
             templateMapper.put("password", userExistsDTO.getPassword());
@@ -93,9 +94,34 @@ public class SendEmailServiceImpl implements SendEmailService {
             String htmlTemplate = FreeMarkerTemplateUtils.processTemplateIntoString(template, templateMapper);
             helper.setText(htmlTemplate, true);
             Transport.send(message);
-        }catch (MessagingException | IOException | TemplateException e){
+        } catch (MessagingException | IOException | TemplateException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void sendForgotPasswordEmail(UserSecurityDTO userSecurityDTO) {
+//        MimeMessage message = new MimeMessage(getSession());
+//        try {
+//            MimeMessageHelper helper = new MimeMessageHelper(
+//                    message,
+//                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+//                    StandardCharsets.UTF_8.name());
+//            helper.setFrom(new InternetAddress(adminEmail));
+//            helper.setTo(userSecurityDTO.getEmail());
+//            helper.setSubject("Password Reset Request");
+//            Template template  = configuration.getTemplate("confirm-changing-password.html");
+//            Map<String, Object> templateMapper = new HashMap<>();
+//            templateMapper.put("username", userSecurityDTO.getUsername());
+//            templateMapper.put("adminEmail", adminEmail);
+//            templateMapper.put("companyName", companyName);
+//            templateMapper.put("securityCode", userSecurityDTO.getSecurityCode());
+//            String htmlTemplate = FreeMarkerTemplateUtils.processTemplateIntoString(template, templateMapper);
+//            helper.setText(htmlTemplate, true);
+//            Transport.send(message);
+//        } catch (MessagingException | IOException | TemplateException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     private Properties getProperties() {

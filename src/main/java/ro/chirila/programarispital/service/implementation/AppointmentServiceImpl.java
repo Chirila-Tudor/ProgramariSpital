@@ -6,17 +6,20 @@ import ro.chirila.programarispital.exception.AppointmentNotFoundException;
 import ro.chirila.programarispital.repository.AppointmentRepository;
 import ro.chirila.programarispital.repository.TypeOfServiceRepository;
 import ro.chirila.programarispital.repository.UserRepository;
-import ro.chirila.programarispital.repository.dto.*;
+import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
+import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
+import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
+import ro.chirila.programarispital.repository.dto.TypeOfServiceDTO;
 import ro.chirila.programarispital.repository.entity.Appointment;
-import ro.chirila.programarispital.repository.entity.Role;
 import ro.chirila.programarispital.repository.entity.TypeOfService;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.AppointmentService;
-import ro.chirila.programarispital.service.UserService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -26,14 +29,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final TypeOfServiceRepository typeOfServiceRepository;
 
-    private final UserService userService;
 
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, ModelMapper modelMapper, UserRepository userRepository, TypeOfServiceRepository typeOfServiceRepository, UserService userService) {
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, ModelMapper modelMapper, UserRepository userRepository, TypeOfServiceRepository typeOfServiceRepository) {
         this.appointmentRepository = appointmentRepository;
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.typeOfServiceRepository = typeOfServiceRepository;
-        this.userService = userService;
     }
 
     @Override
@@ -42,14 +43,14 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Optional<User> optionalUser = userRepository.findByUsername(username);
         User newUser = null;
-        if(optionalUser.isEmpty()){
+        if (optionalUser.isEmpty()) {
             newUser = new User();
             newUser.setUsername(username);
             newUser.setHasPassword(false);
             newUser.setIsActive(false);
             userRepository.save(newUser);
             savedAppointment.setScheduledPerson(newUser);
-        }else{
+        } else {
             savedAppointment.setScheduledPerson(optionalUser.get());
         }
         savedAppointment.setEmail(appointment.getEmail());
@@ -63,7 +64,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         savedAppointment.setTypeOfServices(new ArrayList<>());
 
         for (TypeOfServiceDTO typeOfServiceDTO : appointment.getTypeOfServices()) {
-            TypeOfService typeOfService = typeOfServiceRepository.findByService(typeOfServiceDTO.getService());
+            TypeOfService typeOfService = typeOfServiceRepository.findByService(modelMapper.map(typeOfServiceDTO, TypeOfService.class).getService());
 
             if (typeOfService == null) {
                 savedAppointment.getTypeOfServices().add(modelMapper.map(typeOfServiceDTO, TypeOfService.class));
@@ -71,14 +72,14 @@ public class AppointmentServiceImpl implements AppointmentService {
                 savedAppointment.getTypeOfServices().add(typeOfService);
             }
         }
-        if(optionalUser.isEmpty()){
+        if (optionalUser.isEmpty()) {
             newUser.getAppointments().add(savedAppointment);
-        }else {
+        } else {
             optionalUser.get().getAppointments().add(savedAppointment);
         }
         appointmentRepository.save(savedAppointment);
-         return new AppointmentResponseDTO(savedAppointment.getEmail(), savedAppointment.getFirstName(),
-                savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(),savedAppointment.getChooseDate(),savedAppointment.getAppointmentHour(),
+        return new AppointmentResponseDTO(savedAppointment.getEmail(), savedAppointment.getFirstName(),
+                savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(), savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour(),
                 savedAppointment.getPeriodOfAppointment(), savedAppointment.getTypeOfServices().stream().map(typeOfService -> new TypeOfServiceDTO(typeOfService.getService())).toList(),
                 savedAppointment.getScheduledPerson().getUsername());
 
@@ -153,7 +154,20 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+    @Override
+    public List<AppointmentResponseDTO> getAllAppointments() {
+        List<Appointment> appointments = appointmentRepository.findAll();
+        return appointments.stream().map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).collect(Collectors.toList());
+    }
 
+    @Override
+    public List<AppointmentRequestDTO> getAllFutureAppointments() {
+        LocalDate currentDate = LocalDate.now();
+        List<Appointment> appointments = appointmentRepository.findAllFutureAppointments(currentDate);
+        return appointments.stream()
+                .map(appointment -> modelMapper.map(appointment, AppointmentRequestDTO.class))
+                .collect(Collectors.toList());
+    }
 
 
 }

@@ -9,18 +9,16 @@ import ro.chirila.programarispital.exception.UserAlreadyDeactivatedException;
 import ro.chirila.programarispital.exception.UserAlreadyExistException;
 import ro.chirila.programarispital.exception.UserNotFoundException;
 import ro.chirila.programarispital.repository.UserRepository;
-import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
-import ro.chirila.programarispital.repository.dto.UserExistsDTO;
-import ro.chirila.programarispital.repository.dto.UserResponseDTO;
-import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
+import ro.chirila.programarispital.repository.dto.*;
 import ro.chirila.programarispital.repository.entity.Role;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.UserService;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import static ro.chirila.programarispital.utils.PasswordGenerator.*;
-import static ro.chirila.programarispital.utils.PasswordGenerator.generatePassword;
-import static ro.chirila.programarispital.utils.PasswordGenerator.hashPassword;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -86,9 +84,9 @@ public class UserServiceImpl implements UserService {
         Optional<User> user = userRepository.findByUsername(username);
         UserExistsDTO newUser = null;
         String password = "";
-        if(user.isEmpty()){
+        if (user.isEmpty()) {
             password = generatePassword(12);
-            newUser = new UserExistsDTO(username, hashPassword(password) , true,true, Role.PATIENT,true);
+            newUser = new UserExistsDTO(username, hashPassword(password), true, true, Role.PATIENT, true);
             userRepository.save(modelMapper.map(newUser, User.class));
             newUser.setPassword(password);
         }
@@ -96,13 +94,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changePassword(ChangePasswordDTO changePasswordDTO) {
+    public Boolean changePassword(ChangePasswordDTO changePasswordDTO) {
 
         String username = changePasswordDTO.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
         String hashFrontEndPassword = hashPassword(changePasswordDTO.getNewPassword());
 
-        if(!verifyPassword(changePasswordDTO.getOldPassword(), user.getPassword())){
+        if (!verifyPassword(changePasswordDTO.getOldPassword(), user.getPassword())) {
             return false;
         }
         user.setPassword(hashFrontEndPassword);
@@ -110,6 +108,51 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return true;
 
+    }
+
+    @Override
+    public Boolean forgotPassword(String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            int length = 10;
+            user.setSecurityCode(generateSecurityCode(length));
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean requestNewPassword(String username, String securityCode) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return user.getSecurityCode().equals(securityCode);
+        }
+        return false;
+    }
+
+    @Override
+    public Boolean isFirstLogin(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+        return user.getIsFirstLogin();
+    }
+
+    @Override
+    public List<UserResponseDTO> getAllUsersForAdmin() {
+        List<User> users = userRepository.findAll();
+        return users.stream().map(user -> modelMapper.map(user, UserResponseDTO.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public Boolean modifyUserActivity(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+        user.setIsActive(!user.getIsActive());
+        userRepository.save(user);
+        return user.getIsActive();
     }
 
 
