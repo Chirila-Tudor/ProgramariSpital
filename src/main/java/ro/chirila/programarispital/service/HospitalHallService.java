@@ -3,7 +3,6 @@ package ro.chirila.programarispital.service;
 import org.springframework.stereotype.Service;
 import ro.chirila.programarispital.repository.dto.HospitalHallRequestDTO;
 import ro.chirila.programarispital.repository.dto.HospitalHallResponseDTO;
-import ro.chirila.programarispital.repository.entity.HospitalHall;
 
 import java.util.List;
 
@@ -16,5 +15,5 @@ public interface HospitalHallService {
     void deleteHospitalHallById(Long id);
 
     HospitalHallResponseDTO updateHospitalHall(Long hallId, HospitalHallRequestDTO hospitalHallRequestDTO);
-    HospitalHall getHospitalHallById(Long hallId);
+    HospitalHallResponseDTO getHospitalHallById(Long hallId);
 }

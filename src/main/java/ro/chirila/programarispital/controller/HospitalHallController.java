@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ro.chirila.programarispital.repository.dto.HospitalHallRequestDTO;
 import ro.chirila.programarispital.repository.dto.HospitalHallResponseDTO;
-import ro.chirila.programarispital.repository.entity.HospitalHall;
 import ro.chirila.programarispital.service.HospitalHallService;
 
 import java.util.List;
@@ -50,15 +49,12 @@ public class HospitalHallController {
     }
 
     @GetMapping("/getHall")
-    public ResponseEntity<?> getHospitalHall(@RequestParam Long hallId) {
+    public ResponseEntity<HospitalHallResponseDTO> getHospitalHall(@RequestParam Long hallId) {
         try {
-            HospitalHall hall = hospitalHallService.getHospitalHallById(hallId);
-            if (hall == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Hall not found");
-            }
-            return ResponseEntity.ok(hall);
+            HospitalHallResponseDTO hall = hospitalHallService.getHospitalHallById(hallId);
+            return new ResponseEntity<>(hall, HttpStatus.OK);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

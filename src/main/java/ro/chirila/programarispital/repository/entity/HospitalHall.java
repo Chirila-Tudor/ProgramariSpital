@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "hall")
+@Table(name = "halls")
 @Getter
 @Setter
 public class HospitalHall {

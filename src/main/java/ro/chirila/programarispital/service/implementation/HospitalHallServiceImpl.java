@@ -124,7 +124,8 @@ public class HospitalHallServiceImpl implements HospitalHallService {
     }
 
     @Override
-    public HospitalHall getHospitalHallById(Long hallId) {
-        return hospitalHallRepository.findById(hallId).orElse(null);
+    public HospitalHallResponseDTO getHospitalHallById(Long hallId) {
+        HospitalHall hospitalHall = hospitalHallRepository.findById(hallId).get();
+        return modelMapper.map(hospitalHall, HospitalHallResponseDTO.class);
     }
 }
