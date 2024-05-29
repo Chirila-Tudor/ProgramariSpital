@@ -1,5 +1,6 @@
 package ro.chirila.programarispital.scheduled;
 
+import org.hibernate.Hibernate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
@@ -22,11 +23,13 @@ public class ReminderNotifications {
         this.appointmentService = appointmentService;
     }
 
-    @Scheduled(cron = "0 10 * * *")
+    @Scheduled(cron = "0 0/30 14-16 * * *")
     public void sendReminderNotifications() {
-        List<AppointmentResponseDTO> appointments = appointmentService.getAllAppointments();
+        List<AppointmentResponseDTO> appointments = appointmentService.getAllFutureAppointments();
         LocalDate today = LocalDate.now();
         for (AppointmentResponseDTO appointment : appointments) {
+            Hibernate.initialize(appointment.getTypeOfServices());
+
             LocalDate appointmentDate = LocalDate.parse(appointment.getChooseDate(), formatter);
 
             long daysBetween = ChronoUnit.DAYS.between(today, appointmentDate);

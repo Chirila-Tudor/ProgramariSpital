@@ -40,9 +40,9 @@ public class HospitalHallController {
         return new ResponseEntity<>("Hall successfully deleted!", HttpStatus.OK);
     }
 
-    @PutMapping("/{hallId}")
+    @PutMapping("/update-hall")
     public ResponseEntity<HospitalHallResponseDTO> updateHospitalHall(
-            @PathVariable("hallId") Long hallId,
+            @RequestParam("hallId") Long hallId,
             @RequestBody HospitalHallRequestDTO hospitalHallRequestDTO) {
         HospitalHallResponseDTO updatedHall = hospitalHallService.updateHospitalHall(hallId, hospitalHallRequestDTO);
         return ResponseEntity.ok(updatedHall);

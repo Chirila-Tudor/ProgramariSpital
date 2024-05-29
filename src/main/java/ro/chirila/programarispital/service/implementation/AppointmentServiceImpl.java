@@ -19,7 +19,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -87,7 +86,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentUpdateDTO appointmentUpdateDTO) {
-        if (appointmentRepository.findById(id).isPresent()) {
+        /*if (appointmentRepository.findById(id).isPresent()) {
             Appointment appointment = appointmentRepository.findById(id).get();
 
             if (appointmentUpdateDTO.getEmail() != null) {
@@ -142,7 +141,18 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         } else {
             throw new AppointmentNotFoundException("Appointment doesn't exist.");
-        }
+        }*/
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
+
+        Appointment appointment = optionalAppointment.get();
+
+        appointment.setChooseDate(appointmentUpdateDTO.getChooseDate());
+        appointment.setAppointmentHour(appointmentUpdateDTO.getAppointmentHour());
+        appointment.setPeriodOfAppointment(appointmentUpdateDTO.getPeriodOfAppointment());
+
+        appointmentRepository.save(appointment);
+
+        return modelMapper.map(appointment, AppointmentResponseDTO.class);
     }
 
     @Override
@@ -157,16 +167,15 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentResponseDTO> getAllAppointments() {
         List<Appointment> appointments = appointmentRepository.findAll();
-        return appointments.stream().map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).collect(Collectors.toList());
+        return appointments.stream().map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
     }
 
     @Override
-    public List<AppointmentRequestDTO> getAllFutureAppointments() {
+    public List<AppointmentResponseDTO> getAllFutureAppointments() {
         LocalDate currentDate = LocalDate.now();
         List<Appointment> appointments = appointmentRepository.findAllFutureAppointments(currentDate);
         return appointments.stream()
-                .map(appointment -> modelMapper.map(appointment, AppointmentRequestDTO.class))
-                .collect(Collectors.toList());
+                .map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
     }
 
 

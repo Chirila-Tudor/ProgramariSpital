@@ -45,10 +45,11 @@ public class AppointmentController {
         return new ResponseEntity<>(appointmentResponseDTO, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/update")
+    @PutMapping("/update")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@RequestParam Long id,
                                                                     @RequestBody AppointmentUpdateDTO appointmentUpdateDTO) {
+        CompletableFuture.runAsync(() -> sendEmailService.sendUpdatedAppointmentEmail(appointmentUpdateDTO,id));
         return new ResponseEntity<>(appointmentService.updateAppointment(id, appointmentUpdateDTO), HttpStatus.OK);
     }
 
@@ -67,7 +68,7 @@ public class AppointmentController {
 
     @Transactional
     @GetMapping("/future-appointments")
-    public ResponseEntity<List<AppointmentRequestDTO>> getAllFutureAppointments() {
+    public ResponseEntity<List<AppointmentResponseDTO>> getAllFutureAppointments() {
         return new ResponseEntity<>(appointmentService.getAllFutureAppointments(), HttpStatus.OK);
     }
 }

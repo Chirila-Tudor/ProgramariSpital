@@ -113,9 +113,15 @@ public class HospitalHallServiceImpl implements HospitalHallService {
         }
 
         if (hospitalHallRequestDTO.getEquipment() != null && !hospitalHallRequestDTO.getEquipment().isEmpty()) {
-            List<Equipment> equipmentList = hospitalHallRequestDTO.getEquipment().stream()
-                    .map(equipmentDTO -> modelMapper.map(equipmentDTO, Equipment.class))
-                    .collect(Collectors.toList());
+            List<Equipment> equipmentList = new ArrayList<>();
+            for (EquipmentDTO equipmentDTO : hospitalHallRequestDTO.getEquipment()) {
+                Equipment equipment = equipmentRepository.findByName(equipmentDTO.getName());
+                if (equipment == null) {
+                    equipment = modelMapper.map(equipmentDTO, Equipment.class);
+                    equipmentRepository.save(equipment);
+                }
+                equipmentList.add(equipment);
+            }
             hospitalHall.setEquipment(equipmentList);
         }
 
@@ -125,7 +131,7 @@ public class HospitalHallServiceImpl implements HospitalHallService {
 
     @Override
     public HospitalHallResponseDTO getHospitalHallById(Long hallId) {
-        HospitalHall hospitalHall = hospitalHallRepository.findById(hallId).get();
+        Optional<HospitalHall> hospitalHall = hospitalHallRepository.findById(hallId);
         return modelMapper.map(hospitalHall, HospitalHallResponseDTO.class);
     }
 }
