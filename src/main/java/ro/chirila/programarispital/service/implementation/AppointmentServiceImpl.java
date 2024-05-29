@@ -86,62 +86,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentUpdateDTO appointmentUpdateDTO) {
-        /*if (appointmentRepository.findById(id).isPresent()) {
-            Appointment appointment = appointmentRepository.findById(id).get();
-
-            if (appointmentUpdateDTO.getEmail() != null) {
-                appointment.setEmail(appointmentUpdateDTO.getEmail());
-            }
-            if (appointmentUpdateDTO.getEmail() != null) {
-                appointment.setFirstName(appointmentUpdateDTO.getFirstName());
-            }
-            if (appointmentUpdateDTO.getLastName() != null) {
-                appointment.setLastName(appointmentUpdateDTO.getLastName());
-            }
-            if (appointmentUpdateDTO.getPhoneNumber() != null) {
-                appointment.setPhoneNumber(appointmentUpdateDTO.getPhoneNumber());
-            }
-            if (appointmentUpdateDTO.getDateOfBirth() != null) {
-                appointment.setDateOfBirth(appointmentUpdateDTO.getDateOfBirth());
-            }
-            if (appointmentUpdateDTO.getChooseDate() != null) {
-                appointment.setChooseDate(appointmentUpdateDTO.getChooseDate());
-            }
-            if (appointmentUpdateDTO.getAppointmentHour() != null) {
-                appointment.setAppointmentHour(appointmentUpdateDTO.getAppointmentHour());
-            }
-            if (appointmentUpdateDTO.getAppointmentHour() != null) {
-                appointment.setPeriodOfAppointment(appointmentUpdateDTO.getPeriodOfAppointment());
-            }
-
-            if (appointmentUpdateDTO.getTypeOfService() != null) {
-                if (appointmentUpdateDTO.getTypeOfService().isEmpty()) {
-                    throw new RuntimeException("Please select at least one type of service.");
-                }
-                List<TypeOfService> newTypeOfServiceList = new ArrayList<>();
-
-                for (TypeOfServiceDTO typeOfServiceDTO : appointmentUpdateDTO.getTypeOfService()) {
-
-                    TypeOfService newTypeOfService = typeOfServiceRepository.findByService(typeOfServiceDTO.getService());
-                    if (newTypeOfService == null) {
-                        TypeOfService addedTypeOfService = new TypeOfService();
-                        addedTypeOfService.setService(typeOfServiceDTO.getService());
-                        typeOfServiceRepository.save(addedTypeOfService);
-                        newTypeOfServiceList.add(addedTypeOfService);
-                    } else {
-                        newTypeOfServiceList.add(newTypeOfService);
-                    }
-                }
-                appointment.setTypeOfServices(newTypeOfServiceList);
-            }
-
-            AppointmentResponseDTO responseDTO = modelMapper.map(appointmentRepository.save(appointment), AppointmentResponseDTO.class);
-            //responseDTO.setScheduledPerson(appointmentRepository.findById(id).get().getScheduledPerson());
-            return responseDTO;
-
-        } else {
-            throw new AppointmentNotFoundException("Appointment doesn't exist.");
-        }*/
         Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
 
         Appointment appointment = optionalAppointment.get();
