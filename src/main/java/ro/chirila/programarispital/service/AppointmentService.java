@@ -17,7 +17,9 @@ public interface AppointmentService {
 
     List<AppointmentResponseDTO> getAllAppointments();
 
-    List<AppointmentRequestDTO> getAllFutureAppointments();
+    List<AppointmentResponseDTO> getAllFutureAppointments();
+
+    AppointmentResponseDTO getAppointmentById(Long id);
 
 
 }

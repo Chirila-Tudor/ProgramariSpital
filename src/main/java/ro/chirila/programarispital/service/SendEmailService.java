@@ -11,5 +11,5 @@ public interface SendEmailService {
 
     void sendPasswordForHospitalPersonal(UserExistsDTO userExistsDTO, UserRequestDTO userRequestDTO);
 
-    void sendForgotPasswordEmail(UserSecurityDTO userSecurityDTO);
+    void sendUpdatedAppointmentEmail(AppointmentUpdateDTO appointmentUpdateDTO, Long id);
 }

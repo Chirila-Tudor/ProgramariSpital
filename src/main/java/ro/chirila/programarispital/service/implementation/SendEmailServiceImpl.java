@@ -11,7 +11,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
+import ro.chirila.programarispital.repository.AppointmentRepository;
 import ro.chirila.programarispital.repository.dto.*;
+import ro.chirila.programarispital.repository.entity.Appointment;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.SendEmailService;
 
@@ -19,12 +21,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 @Service
 public class SendEmailServiceImpl implements SendEmailService {
     private final JavaMailSender emailSender;
     private final Configuration configuration;
+    private final AppointmentRepository appointmentRepository;
 
     @Value("${spring.mail.username}")
     private String adminEmail;
@@ -33,15 +37,16 @@ public class SendEmailServiceImpl implements SendEmailService {
     private String password;
     private String companyName = "Hospital appointment software";
 
-    public SendEmailServiceImpl(JavaMailSender emailSender, Configuration configuration) {
+    public SendEmailServiceImpl(JavaMailSender emailSender, Configuration configuration, AppointmentRepository appointmentRepository) {
         this.emailSender = emailSender;
         this.configuration = configuration;
+        this.appointmentRepository = appointmentRepository;
     }
 
     @Override
     public void sendAppointmentEmail(AppointmentResponseDTO appointment) {
         String services = "";
-        for (TypeOfServiceDTO typeOfServiceDTO : appointment.getTypeOfService()) {
+        for (TypeOfServiceDTO typeOfServiceDTO : appointment.getTypeOfServices()) {
             services += typeOfServiceDTO.getService() + "\n";
         }
         MimeMessage message = new MimeMessage(getSession());
@@ -55,7 +60,7 @@ public class SendEmailServiceImpl implements SendEmailService {
             helper.setSubject("Appointment to " + companyName);
             Template template = configuration.getTemplate("appointment-mail.html");
             Map<String, Object> templateMapper = new HashMap<>();
-            templateMapper.put("username", appointment.getFirstName());
+            templateMapper.put("username", appointment.getFirstName() + " " + appointment.getLastName());
             templateMapper.put("appointmentDate", appointment.getChooseDate());
             templateMapper.put("appointmentHour", appointment.getAppointmentHour());
             templateMapper.put("service", services);
@@ -84,7 +89,7 @@ public class SendEmailServiceImpl implements SendEmailService {
             helper.setSubject("Appointment to " + companyName);
             Template template = configuration.getTemplate("send-password.html");
             Map<String, Object> templateMapper = new HashMap<>();
-            templateMapper.put("username", appointment.getFirstName());
+            templateMapper.put("username", appointment.getFirstName() + " " + appointment.getLastName());
             templateMapper.put("password", userExistsDTO.getPassword());
             templateMapper.put("adminEmail", adminEmail);
             templateMapper.put("companyName", companyName);
@@ -124,29 +129,37 @@ public class SendEmailServiceImpl implements SendEmailService {
     }
 
     @Override
-    public void sendForgotPasswordEmail(UserSecurityDTO userSecurityDTO) {
-//        MimeMessage message = new MimeMessage(getSession());
-//        try {
-//            MimeMessageHelper helper = new MimeMessageHelper(
-//                    message,
-//                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
-//                    StandardCharsets.UTF_8.name());
-//            helper.setFrom(new InternetAddress(adminEmail));
-//            helper.setTo(userSecurityDTO.getEmail());
-//            helper.setSubject("Password Reset Request");
-//            Template template  = configuration.getTemplate("confirm-changing-password.html");
-//            Map<String, Object> templateMapper = new HashMap<>();
-//            templateMapper.put("username", userSecurityDTO.getUsername());
-//            templateMapper.put("adminEmail", adminEmail);
-//            templateMapper.put("companyName", companyName);
-//            templateMapper.put("securityCode", userSecurityDTO.getSecurityCode());
-//            String htmlTemplate = FreeMarkerTemplateUtils.processTemplateIntoString(template, templateMapper);
-//            helper.setText(htmlTemplate, true);
-//            Transport.send(message);
-//        } catch (MessagingException | IOException | TemplateException e) {
-//            throw new RuntimeException(e);
-//        }
+    public void sendUpdatedAppointmentEmail(AppointmentUpdateDTO appointmentUpdateDTO, Long id) {
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
+
+        Appointment appointment = optionalAppointment.get();
+        String recipientEmail = appointment.getEmail();
+
+        MimeMessage message = new MimeMessage(getSession());
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(
+                    message,
+                    MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            helper.setFrom(new InternetAddress(adminEmail));
+            helper.setTo(new InternetAddress(recipientEmail));
+            helper.setSubject("Appointment to " + companyName);
+            Template template = configuration.getTemplate("updated-appointment-mail.html");
+            Map<String, Object> templateMapper = new HashMap<>();
+            templateMapper.put("username", appointment.getFirstName() + " " + appointment.getLastName());
+            templateMapper.put("appointmentDate", appointmentUpdateDTO.getChooseDate());
+            templateMapper.put("appointmentHour", appointmentUpdateDTO.getAppointmentHour());
+            templateMapper.put("periodOfTime", appointmentUpdateDTO.getPeriodOfAppointment());
+            templateMapper.put("adminEmail", adminEmail);
+            templateMapper.put("companyName", companyName);
+            String htmlTemplate = FreeMarkerTemplateUtils.processTemplateIntoString(template, templateMapper);
+            helper.setText(htmlTemplate, true);
+            Transport.send(message);
+        } catch (MessagingException | IOException | TemplateException e) {
+            throw new RuntimeException(e);
+        }
     }
+
 
     private Properties getProperties() {
         Properties properties = new Properties();

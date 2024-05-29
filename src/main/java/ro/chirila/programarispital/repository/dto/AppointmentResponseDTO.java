@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppointmentResponseDTO {
+    private Long id;
     private String email;
     private String firstName;
     private String lastName;
@@ -19,6 +20,6 @@ public class AppointmentResponseDTO {
     private String chooseDate;
     private String appointmentHour;
     private PeriodOfAppointment periodOfAppointment;
-    private List<TypeOfServiceDTO> typeOfService;
+    private List<TypeOfServiceDTO> typeOfServices;
     private String scheduledPerson;
 }

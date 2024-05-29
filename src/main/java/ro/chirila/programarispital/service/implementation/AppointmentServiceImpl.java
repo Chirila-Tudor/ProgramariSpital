@@ -6,10 +6,7 @@ import ro.chirila.programarispital.exception.AppointmentNotFoundException;
 import ro.chirila.programarispital.repository.AppointmentRepository;
 import ro.chirila.programarispital.repository.TypeOfServiceRepository;
 import ro.chirila.programarispital.repository.UserRepository;
-import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
-import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
-import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
-import ro.chirila.programarispital.repository.dto.TypeOfServiceDTO;
+import ro.chirila.programarispital.repository.dto.*;
 import ro.chirila.programarispital.repository.entity.Appointment;
 import ro.chirila.programarispital.repository.entity.TypeOfService;
 import ro.chirila.programarispital.repository.entity.User;
@@ -19,7 +16,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -78,7 +74,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             optionalUser.get().getAppointments().add(savedAppointment);
         }
         appointmentRepository.save(savedAppointment);
-        return new AppointmentResponseDTO(savedAppointment.getEmail(), savedAppointment.getFirstName(),
+        return new AppointmentResponseDTO(savedAppointment.getId(), savedAppointment.getEmail(), savedAppointment.getFirstName(),
                 savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(), savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour(),
                 savedAppointment.getPeriodOfAppointment(), savedAppointment.getTypeOfServices().stream().map(typeOfService -> new TypeOfServiceDTO(typeOfService.getService())).toList(),
                 savedAppointment.getScheduledPerson().getUsername());
@@ -87,62 +83,17 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseDTO updateAppointment(Long id, AppointmentUpdateDTO appointmentUpdateDTO) {
-        if (appointmentRepository.findById(id).isPresent()) {
-            Appointment appointment = appointmentRepository.findById(id).get();
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(id);
 
-            if (appointmentUpdateDTO.getEmail() != null) {
-                appointment.setEmail(appointmentUpdateDTO.getEmail());
-            }
-            if (appointmentUpdateDTO.getEmail() != null) {
-                appointment.setFirstName(appointmentUpdateDTO.getFirstName());
-            }
-            if (appointmentUpdateDTO.getLastName() != null) {
-                appointment.setLastName(appointmentUpdateDTO.getLastName());
-            }
-            if (appointmentUpdateDTO.getPhoneNumber() != null) {
-                appointment.setPhoneNumber(appointmentUpdateDTO.getPhoneNumber());
-            }
-            if (appointmentUpdateDTO.getDateOfBirth() != null) {
-                appointment.setDateOfBirth(appointmentUpdateDTO.getDateOfBirth());
-            }
-            if (appointmentUpdateDTO.getChooseDate() != null) {
-                appointment.setChooseDate(appointmentUpdateDTO.getChooseDate());
-            }
-            if (appointmentUpdateDTO.getAppointmentHour() != null) {
-                appointment.setAppointmentHour(appointmentUpdateDTO.getAppointmentHour());
-            }
-            if (appointmentUpdateDTO.getAppointmentHour() != null) {
-                appointment.setPeriodOfAppointment(appointmentUpdateDTO.getPeriodOfAppointment());
-            }
+        Appointment appointment = optionalAppointment.get();
 
-            if (appointmentUpdateDTO.getTypeOfService() != null) {
-                if (appointmentUpdateDTO.getTypeOfService().isEmpty()) {
-                    throw new RuntimeException("Please select at least one type of service.");
-                }
-                List<TypeOfService> newTypeOfServiceList = new ArrayList<>();
+        appointment.setChooseDate(appointmentUpdateDTO.getChooseDate());
+        appointment.setAppointmentHour(appointmentUpdateDTO.getAppointmentHour());
+        appointment.setPeriodOfAppointment(appointmentUpdateDTO.getPeriodOfAppointment());
 
-                for (TypeOfServiceDTO typeOfServiceDTO : appointmentUpdateDTO.getTypeOfService()) {
+        appointmentRepository.save(appointment);
 
-                    TypeOfService newTypeOfService = typeOfServiceRepository.findByService(typeOfServiceDTO.getService());
-                    if (newTypeOfService == null) {
-                        TypeOfService addedTypeOfService = new TypeOfService();
-                        addedTypeOfService.setService(typeOfServiceDTO.getService());
-                        typeOfServiceRepository.save(addedTypeOfService);
-                        newTypeOfServiceList.add(addedTypeOfService);
-                    } else {
-                        newTypeOfServiceList.add(newTypeOfService);
-                    }
-                }
-                appointment.setTypeOfServices(newTypeOfServiceList);
-            }
-
-            AppointmentResponseDTO responseDTO = modelMapper.map(appointmentRepository.save(appointment), AppointmentResponseDTO.class);
-            //responseDTO.setScheduledPerson(appointmentRepository.findById(id).get().getScheduledPerson());
-            return responseDTO;
-
-        } else {
-            throw new AppointmentNotFoundException("Appointment doesn't exist.");
-        }
+        return modelMapper.map(appointment, AppointmentResponseDTO.class);
     }
 
     @Override
@@ -157,16 +108,21 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentResponseDTO> getAllAppointments() {
         List<Appointment> appointments = appointmentRepository.findAll();
-        return appointments.stream().map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).collect(Collectors.toList());
+        return appointments.stream().map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
     }
 
     @Override
-    public List<AppointmentRequestDTO> getAllFutureAppointments() {
+    public List<AppointmentResponseDTO> getAllFutureAppointments() {
         LocalDate currentDate = LocalDate.now();
         List<Appointment> appointments = appointmentRepository.findAllFutureAppointments(currentDate);
         return appointments.stream()
-                .map(appointment -> modelMapper.map(appointment, AppointmentRequestDTO.class))
-                .collect(Collectors.toList());
+                .map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
+    }
+
+    @Override
+    public AppointmentResponseDTO getAppointmentById(Long id) {
+        Optional<Appointment> appointment = appointmentRepository.findById(id);
+        return modelMapper.map(appointment, AppointmentResponseDTO.class);
     }
 
 
