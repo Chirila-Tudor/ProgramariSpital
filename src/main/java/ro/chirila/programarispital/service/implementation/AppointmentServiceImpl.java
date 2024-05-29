@@ -6,10 +6,7 @@ import ro.chirila.programarispital.exception.AppointmentNotFoundException;
 import ro.chirila.programarispital.repository.AppointmentRepository;
 import ro.chirila.programarispital.repository.TypeOfServiceRepository;
 import ro.chirila.programarispital.repository.UserRepository;
-import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
-import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
-import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
-import ro.chirila.programarispital.repository.dto.TypeOfServiceDTO;
+import ro.chirila.programarispital.repository.dto.*;
 import ro.chirila.programarispital.repository.entity.Appointment;
 import ro.chirila.programarispital.repository.entity.TypeOfService;
 import ro.chirila.programarispital.repository.entity.User;
@@ -77,7 +74,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             optionalUser.get().getAppointments().add(savedAppointment);
         }
         appointmentRepository.save(savedAppointment);
-        return new AppointmentResponseDTO(savedAppointment.getEmail(), savedAppointment.getFirstName(),
+        return new AppointmentResponseDTO(savedAppointment.getId(), savedAppointment.getEmail(), savedAppointment.getFirstName(),
                 savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(), savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour(),
                 savedAppointment.getPeriodOfAppointment(), savedAppointment.getTypeOfServices().stream().map(typeOfService -> new TypeOfServiceDTO(typeOfService.getService())).toList(),
                 savedAppointment.getScheduledPerson().getUsername());
@@ -120,6 +117,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<Appointment> appointments = appointmentRepository.findAllFutureAppointments(currentDate);
         return appointments.stream()
                 .map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
+    }
+
+    @Override
+    public AppointmentResponseDTO getAppointmentById(Long id) {
+        Optional<Appointment> appointment = appointmentRepository.findById(id);
+        return modelMapper.map(appointment, AppointmentResponseDTO.class);
     }
 
 

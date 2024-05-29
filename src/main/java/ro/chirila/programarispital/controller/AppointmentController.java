@@ -5,10 +5,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
-import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
-import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
-import ro.chirila.programarispital.repository.dto.UserExistsDTO;
+import ro.chirila.programarispital.repository.dto.*;
 import ro.chirila.programarispital.service.AppointmentService;
 import ro.chirila.programarispital.service.SendEmailService;
 import ro.chirila.programarispital.service.UserService;
@@ -45,7 +42,7 @@ public class AppointmentController {
         return new ResponseEntity<>(appointmentResponseDTO, HttpStatus.CREATED);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update-appointment")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@RequestParam Long id,
                                                                     @RequestBody AppointmentUpdateDTO appointmentUpdateDTO) {
@@ -70,5 +67,14 @@ public class AppointmentController {
     @GetMapping("/future-appointments")
     public ResponseEntity<List<AppointmentResponseDTO>> getAllFutureAppointments() {
         return new ResponseEntity<>(appointmentService.getAllFutureAppointments(), HttpStatus.OK);
+    }
+    @GetMapping("/getAppointment")
+    public ResponseEntity<AppointmentResponseDTO> getAppointment(@RequestParam Long id) {
+        try {
+            AppointmentResponseDTO appointment = appointmentService.getAppointmentById(id);
+            return new ResponseEntity<>(appointment, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }

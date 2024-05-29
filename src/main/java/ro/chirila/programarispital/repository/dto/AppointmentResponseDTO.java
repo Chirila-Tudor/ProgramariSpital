@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppointmentResponseDTO {
+    private Long id;
     private String email;
     private String firstName;
     private String lastName;
