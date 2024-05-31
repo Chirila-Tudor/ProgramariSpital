@@ -15,7 +15,7 @@ public class Appointment {
 
     //region Constructors
     public Appointment(Long id, String email, String firstName, String lastName, String dateOfBirth, String phoneNumber, List<TypeOfService> typeOfServices,
-                       String chooseDate, String appointmentHour, User scheduledPerson, PeriodOfAppointment periodOfAppointment) {
+                       String chooseDate, String appointmentHour, User scheduledPerson, PeriodOfAppointment periodOfAppointment, HospitalHall hospitalHall) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -27,6 +27,7 @@ public class Appointment {
         this.appointmentHour = appointmentHour;
         this.scheduledPerson = scheduledPerson;
         this.periodOfAppointment = periodOfAppointment;
+        this.hospitalHall = hospitalHall;
     }
 
     public Appointment() {
@@ -62,5 +63,9 @@ public class Appointment {
     @JoinColumn(name = "id_person", referencedColumnName = "id_person")
     private User scheduledPerson;
 
+    @JsonIgnoreProperties("appointments")
+    @ManyToOne
+    @JoinColumn(name = "id_hall", referencedColumnName = "id_hall")
+    private HospitalHall hospitalHall;
 
 }
