@@ -9,14 +9,16 @@ import ro.chirila.programarispital.exception.UserAlreadyDeactivatedException;
 import ro.chirila.programarispital.exception.UserAlreadyExistException;
 import ro.chirila.programarispital.exception.UserNotFoundException;
 import ro.chirila.programarispital.repository.UserRepository;
-import ro.chirila.programarispital.repository.dto.*;
+import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
+import ro.chirila.programarispital.repository.dto.UserExistsDTO;
+import ro.chirila.programarispital.repository.dto.UserResponseDTO;
+import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
 import ro.chirila.programarispital.repository.entity.Role;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static ro.chirila.programarispital.utils.PasswordGenerator.*;
 
@@ -165,7 +167,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponseDTO> getAllUsersForAdmin() {
         List<User> users = userRepository.findAll();
-        return users.stream().map(user -> modelMapper.map(user, UserResponseDTO.class)).collect(Collectors.toList());
+        return users.stream().map(user -> modelMapper.map(user, UserResponseDTO.class)).toList();
     }
 
     @Override
