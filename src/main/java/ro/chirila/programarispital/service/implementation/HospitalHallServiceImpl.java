@@ -3,6 +3,7 @@ package ro.chirila.programarispital.service.implementation;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import ro.chirila.programarispital.exception.AppointmentNotFoundException;
+import ro.chirila.programarispital.exception.HospitalHallNotFoundException;
 import ro.chirila.programarispital.repository.EquipmentRepository;
 import ro.chirila.programarispital.repository.HospitalHallRepository;
 import ro.chirila.programarispital.repository.UserRepository;
@@ -131,7 +132,7 @@ public class HospitalHallServiceImpl implements HospitalHallService {
 
     @Override
     public HospitalHallResponseDTO getHospitalHallById(Long hallId) {
-        Optional<HospitalHall> hospitalHall = hospitalHallRepository.findById(hallId);
+        HospitalHall hospitalHall = hospitalHallRepository.findById(hallId).orElseThrow(()->new HospitalHallNotFoundException("Hall doesn't exists."));
         return modelMapper.map(hospitalHall, HospitalHallResponseDTO.class);
     }
 }

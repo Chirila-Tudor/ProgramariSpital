@@ -68,11 +68,11 @@ public class AppointmentController {
     public ResponseEntity<List<AppointmentResponseDTO>> getAllFutureAppointments() {
         return new ResponseEntity<>(appointmentService.getAllFutureAppointments(), HttpStatus.OK);
     }
+    @Transactional
     @GetMapping("/getAppointment")
     public ResponseEntity<AppointmentResponseDTO> getAppointment(@RequestParam Long id) {
         try {
-            AppointmentResponseDTO appointment = appointmentService.getAppointmentById(id);
-            return new ResponseEntity<>(appointment, HttpStatus.OK);
+            return new ResponseEntity<>(appointmentService.getAppointmentById(id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
