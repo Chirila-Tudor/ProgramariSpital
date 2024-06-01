@@ -16,4 +16,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findAllFutureAppointments(@Param("currentDate") LocalDate currentDate);
 
     boolean existsByHospitalHallAndChooseDateAndAppointmentHour(HospitalHall hospitalHall, String chooseDate, String appointmentHour);
+    List<Appointment> findByScheduledPersonUsername(String username);
+
 }

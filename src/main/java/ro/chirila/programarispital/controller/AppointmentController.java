@@ -77,4 +77,8 @@ public class AppointmentController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+    @GetMapping("/getAppointmentForUser")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByScheduledPerson(@RequestParam String username) {
+        return new ResponseEntity<>(appointmentService.getAppointmentsByScheduledPerson(username), HttpStatus.OK);
+    }
 }

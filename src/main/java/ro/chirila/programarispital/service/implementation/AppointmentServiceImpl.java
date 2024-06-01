@@ -144,4 +144,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment doesn't exists."));
         return modelMapper.map(appointment, AppointmentResponseDTO.class);
     }
+
+    @Override
+    public List<AppointmentResponseDTO> getAppointmentsByScheduledPerson(String username) {
+        List<Appointment> appointments = appointmentRepository.findByScheduledPersonUsername(username);
+        return appointments.stream()
+                .map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
+    }
+
 }
