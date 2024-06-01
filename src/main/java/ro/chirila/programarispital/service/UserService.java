@@ -26,13 +26,14 @@ public interface UserService {
 
     Boolean changePassword(ChangePasswordDTO changePasswordDTO);
 
-    Boolean forgotPassword(String username);
+    String forgotPassword(String username);
 
-    Boolean requestNewPassword(String username, String securityCode);
+    String requestNewPassword(String username, String securityCode);
 
     Boolean isFirstLogin(String username);
 
     List<UserResponseDTO> getAllUsersForAdmin();
 
     Boolean modifyUserActivity(Long id);
+    String getEmailByUsername(String username);
 }

@@ -71,8 +71,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            // TODO remove hashPassword after adding hashing in UI
-            if (user.getIsActive() && hashPassword(password).equals(user.getPassword())) {
+            if (user.getIsActive() && password.equals(user.getPassword())) {
                 return modelMapper.map(user, UserSecurityDTO.class);
             }
             if (!user.getIsActive() && password.equals(user.getPassword())) {
@@ -122,12 +121,11 @@ public class UserServiceImpl implements UserService {
 
         String username = changePasswordDTO.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
-        String hashFrontEndPassword = hashPassword(changePasswordDTO.getNewPassword());
 
-        if (!verifyPassword(changePasswordDTO.getOldPassword(), user.getPassword())) {
+        if(!changePasswordDTO.getOldPassword().equals(user.getPassword())){
             return false;
         }
-        user.setPassword(hashFrontEndPassword);
+        user.setPassword(changePasswordDTO.getNewPassword());
         user.setIsFirstLogin(false);
         userRepository.save(user);
         return true;
@@ -135,26 +133,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean forgotPassword(String username) {
+    public String forgotPassword(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             int length = 10;
-            user.setSecurityCode(generateSecurityCode(length));
+            String securityCode = generateSecurityCode(length);
+            user.setSecurityCode(securityCode);
             userRepository.save(user);
-            return true;
+            return securityCode;
         }
-        return false;
+        throw new BadCredentialsException("Wrong security code");
+
     }
 
     @Override
-    public Boolean requestNewPassword(String username, String securityCode) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            return user.getSecurityCode().equals(securityCode);
+    public String requestNewPassword(String username, String securityCode) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
+        if (!user.getSecurityCode().equals(securityCode)) {
+            throw new BadCredentialsException("Invalid security code");
         }
-        return false;
+        String password = generatePassword(12);
+        user.setIsFirstLogin(true);
+        user.setPassword(hashPassword(password));
+        userRepository.save(user);
+        return password;
     }
 
     @Override
@@ -177,6 +180,12 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(!user.getIsActive());
         userRepository.save(user);
         return user.getIsActive();
+    }
+
+    @Override
+    public String getEmailByUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
+        return user.getEmail();
     }
 
 

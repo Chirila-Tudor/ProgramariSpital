@@ -141,9 +141,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseDTO getAppointmentById(Long id) {
-        Appointment appointment = appointmentRepository.findById(id).orElseThrow(()->new AppointmentNotFoundException("Appointment doesn't exists."));
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment doesn't exists."));
         return modelMapper.map(appointment, AppointmentResponseDTO.class);
     }
-
-
 }
