@@ -32,7 +32,7 @@ public class AppointmentController {
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> addAppointment(@RequestBody AppointmentRequestDTO appointmentRequestDTO
             , @RequestParam String username) {
-        UserExistsDTO userExistsDTO = userService.setPasswordForPatient(username);
+        UserExistsDTO userExistsDTO = userService.setPasswordForPatient(username, appointmentRequestDTO.getEmail());
         AppointmentResponseDTO appointmentResponseDTO = appointmentService.addAppointment(appointmentRequestDTO, username);
         if (userExistsDTO != null) {
             CompletableFuture.runAsync(() -> sendEmailService.sendPasswordEmail(userExistsDTO, appointmentResponseDTO));

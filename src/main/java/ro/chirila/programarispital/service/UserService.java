@@ -20,7 +20,7 @@ public interface UserService {
 
     UserSecurityDTO login(String username, String password);
 
-    UserExistsDTO setPasswordForPatient(String username);
+    UserExistsDTO setPasswordForPatient(String username, String email);
 
     UserExistsDTO setPasswordForUser(String username, Role role);
 

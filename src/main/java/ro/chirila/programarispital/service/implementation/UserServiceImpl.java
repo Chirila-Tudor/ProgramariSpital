@@ -83,13 +83,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserExistsDTO setPasswordForPatient(String username) {
+    public UserExistsDTO setPasswordForPatient(String username, String email) {
         Optional<User> user = userRepository.findByUsername(username);
         UserExistsDTO newUser = null;
         String password = "";
         if (user.isEmpty()) {
             password = generatePassword(12);
-            newUser = new UserExistsDTO(username, hashPassword(password), true, true, Role.PATIENT, true);
+            newUser = new UserExistsDTO(username, hashPassword(password), true, true, Role.PATIENT, true,email);
             userRepository.save(modelMapper.map(newUser, User.class));
             newUser.setPassword(password);
         }
