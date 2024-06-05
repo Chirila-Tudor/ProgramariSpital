@@ -30,7 +30,7 @@ public class HospitalHallController {
 
     @Transactional
     @GetMapping("/get-all-halls")
-    public ResponseEntity<List<HospitalHallResponseDTO>> getAllAppointments() {
+    public ResponseEntity<List<HospitalHallResponseDTO>> getAllHalls() {
         return new ResponseEntity<>(hospitalHallService.getAllHospitalHalls(), HttpStatus.OK);
     }
 

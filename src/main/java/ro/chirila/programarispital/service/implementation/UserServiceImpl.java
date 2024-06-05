@@ -188,5 +188,12 @@ public class UserServiceImpl implements UserService {
         return user.getEmail();
     }
 
+    @Override
+    public List<UserSecurityDTO> getAllDoctors() {
+        List<User> users = userRepository.findByRole(Role.DOCTOR);
+        return users.stream().map(user -> modelMapper.map(user, UserSecurityDTO.class)).toList();
+
+    }
+
 
 }

@@ -114,5 +114,9 @@ public class UserController {
         return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
-
+    @GetMapping("/allDoctors")
+    public ResponseEntity<List<UserSecurityDTO>> getAllDoctors() {
+        List<UserSecurityDTO> doctors = userService.getAllDoctors();
+        return new ResponseEntity<>(doctors, HttpStatus.OK);
+    }
 }
