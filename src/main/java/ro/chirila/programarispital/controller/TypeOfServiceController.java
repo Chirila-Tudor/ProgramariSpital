@@ -45,4 +45,9 @@ public class TypeOfServiceController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+    @GetMapping("/getDoctorsByService")
+    public ResponseEntity<List<String>> getDoctorsByTypeOfService(@RequestParam Long serviceId) {
+        List<String> doctorUsernames = typeOfWorkService.getDoctorsByTypeOfService(serviceId);
+        return ResponseEntity.ok(doctorUsernames);
+    }
 }

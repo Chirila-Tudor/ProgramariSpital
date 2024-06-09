@@ -14,4 +14,6 @@ public interface TypeOfWorkService {
     List<TypeOfServiceResponseDTO> getAllTypeOfServices();
 
     TypeOfServiceResponseDTO getTypeOfServiceById(Long serviceId);
+
+    List<String> getDoctorsByTypeOfService(Long serviceId);
 }

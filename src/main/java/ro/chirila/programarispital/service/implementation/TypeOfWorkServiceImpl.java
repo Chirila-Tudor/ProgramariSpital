@@ -90,5 +90,18 @@ public class TypeOfWorkServiceImpl implements TypeOfWorkService {
         return modelMapper.map(typeOfService, TypeOfServiceResponseDTO.class);
     }
 
+    @Override
+    public List<String> getDoctorsByTypeOfService(Long serviceId) {
+        TypeOfService typeOfService = typeOfServiceRepository.findById(serviceId)
+                .orElseThrow(() -> new TypeOfServiceNotFoundException("Service not found: " + serviceId));
+
+        List<String> doctorUsernames = new ArrayList<>();
+        for (User doctor : typeOfService.getDoctorsWhoCanPerformService()) {
+            doctorUsernames.add(doctor.getUsername());
+        }
+
+        return doctorUsernames;
+    }
+
 
 }
