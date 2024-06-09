@@ -1,6 +1,7 @@
 package ro.chirila.programarispital.service;
 
 import org.springframework.stereotype.Service;
+import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
 import ro.chirila.programarispital.repository.dto.HospitalHallRequestDTO;
 import ro.chirila.programarispital.repository.dto.HospitalHallResponseDTO;
 
@@ -16,4 +17,6 @@ public interface HospitalHallService {
 
     HospitalHallResponseDTO updateHospitalHall(Long hallId, HospitalHallRequestDTO hospitalHallRequestDTO);
     HospitalHallResponseDTO getHospitalHallById(Long hallId);
+    List<AppointmentResponseDTO> getAppointmentsByHospitalHallId(Long hallId);
+    HospitalHallResponseDTO getHospitalHallByDoctor(String doctorUsername);
 }

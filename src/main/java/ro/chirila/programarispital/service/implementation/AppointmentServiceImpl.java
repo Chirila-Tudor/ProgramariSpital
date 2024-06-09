@@ -4,10 +4,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import ro.chirila.programarispital.exception.AppointmentNotFoundException;
 import ro.chirila.programarispital.repository.AppointmentRepository;
+import ro.chirila.programarispital.repository.HospitalHallRepository;
 import ro.chirila.programarispital.repository.TypeOfServiceRepository;
 import ro.chirila.programarispital.repository.UserRepository;
-import ro.chirila.programarispital.repository.dto.*;
+import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
+import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
+import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
+import ro.chirila.programarispital.repository.dto.TypeOfServiceDTO;
 import ro.chirila.programarispital.repository.entity.Appointment;
+import ro.chirila.programarispital.repository.entity.HospitalHall;
 import ro.chirila.programarispital.repository.entity.TypeOfService;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.AppointmentService;
@@ -25,12 +30,16 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final TypeOfServiceRepository typeOfServiceRepository;
 
+    private final HospitalHallRepository hospitalHallRepository;
 
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, ModelMapper modelMapper, UserRepository userRepository, TypeOfServiceRepository typeOfServiceRepository) {
+
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, ModelMapper modelMapper, UserRepository userRepository, TypeOfServiceRepository typeOfServiceRepository, HospitalHallRepository hospitalHallRepository) {
         this.appointmentRepository = appointmentRepository;
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
         this.typeOfServiceRepository = typeOfServiceRepository;
+        this.hospitalHallRepository = hospitalHallRepository;
+
     }
 
     @Override
@@ -68,6 +77,17 @@ public class AppointmentServiceImpl implements AppointmentService {
                 savedAppointment.getTypeOfServices().add(typeOfService);
             }
         }
+        HospitalHall hospitalHall = hospitalHallRepository.findByRoomName(appointment.getHospitalHallName())
+                .orElseThrow(() -> new IllegalArgumentException("HospitalHall not found"));
+
+        boolean isConflict = appointmentRepository.existsByHospitalHallAndChooseDateAndAppointmentHour(
+                hospitalHall, savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour());
+
+        if (isConflict) {
+            throw new IllegalArgumentException("An appointment already exists at this time and room.");
+        }
+        savedAppointment.setHospitalHall(hospitalHall);
+
         if (optionalUser.isEmpty()) {
             newUser.getAppointments().add(savedAppointment);
         } else {
@@ -121,9 +141,15 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponseDTO getAppointmentById(Long id) {
-        Optional<Appointment> appointment = appointmentRepository.findById(id);
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new AppointmentNotFoundException("Appointment doesn't exists."));
         return modelMapper.map(appointment, AppointmentResponseDTO.class);
     }
 
+    @Override
+    public List<AppointmentResponseDTO> getAppointmentsByScheduledPerson(String username) {
+        List<Appointment> appointments = appointmentRepository.findByScheduledPersonUsername(username);
+        return appointments.stream()
+                .map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
+    }
 
 }

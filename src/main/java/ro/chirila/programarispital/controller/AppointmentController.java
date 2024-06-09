@@ -32,7 +32,7 @@ public class AppointmentController {
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> addAppointment(@RequestBody AppointmentRequestDTO appointmentRequestDTO
             , @RequestParam String username) {
-        UserExistsDTO userExistsDTO = userService.setPasswordForPatient(username);
+        UserExistsDTO userExistsDTO = userService.setPasswordForPatient(username, appointmentRequestDTO.getEmail());
         AppointmentResponseDTO appointmentResponseDTO = appointmentService.addAppointment(appointmentRequestDTO, username);
         if (userExistsDTO != null) {
             CompletableFuture.runAsync(() -> sendEmailService.sendPasswordEmail(userExistsDTO, appointmentResponseDTO));
@@ -68,13 +68,17 @@ public class AppointmentController {
     public ResponseEntity<List<AppointmentResponseDTO>> getAllFutureAppointments() {
         return new ResponseEntity<>(appointmentService.getAllFutureAppointments(), HttpStatus.OK);
     }
+    @Transactional
     @GetMapping("/getAppointment")
     public ResponseEntity<AppointmentResponseDTO> getAppointment(@RequestParam Long id) {
         try {
-            AppointmentResponseDTO appointment = appointmentService.getAppointmentById(id);
-            return new ResponseEntity<>(appointment, HttpStatus.OK);
+            return new ResponseEntity<>(appointmentService.getAppointmentById(id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+    @GetMapping("/getAppointmentForUser")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByScheduledPerson(@RequestParam String username) {
+        return new ResponseEntity<>(appointmentService.getAppointmentsByScheduledPerson(username), HttpStatus.OK);
     }
 }

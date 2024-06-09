@@ -26,4 +26,6 @@ public class AppointmentRequestDTO {
     private PeriodOfAppointment periodOfAppointment;
     @NotBlank(message = "Please choose the type of service.")
     private List<TypeOfServiceDTO> typeOfServices;
+    @NotBlank(message = "Please enter the name of the hospital hall.")
+    private String hospitalHallName;
 }

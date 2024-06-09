@@ -1,9 +1,7 @@
 package ro.chirila.programarispital.repository.dto;
 
 import lombok.Data;
-import ro.chirila.programarispital.repository.entity.Appointment;
 import ro.chirila.programarispital.repository.entity.Role;
-import ro.chirila.programarispital.repository.entity.TypeOfService;
 
 import java.util.List;
 
@@ -13,7 +11,7 @@ public class UserResponseDTO {
     private String username;
     private String email;
     private Role role;
-    private List<Appointment> appointments;
-    private List<TypeOfService> services;
+    private List<AppointmentResponseDTO> appointments;
+    private List<TypeOfServiceDTO> services;
     private Boolean isActive;
 }

@@ -15,5 +15,6 @@ public class UserExistsDTO {
     private Boolean hasPassword;
     private Role role;
     private Boolean isFirstLogin;
+    private String email;
 
 }

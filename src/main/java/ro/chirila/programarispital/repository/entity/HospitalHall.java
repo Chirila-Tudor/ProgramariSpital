@@ -34,4 +34,6 @@ public class HospitalHall {
     @JoinColumn(name = "id_person", referencedColumnName = "id_person")
     private User doctor;
 
+    @OneToMany(mappedBy = "hospitalHall", cascade = CascadeType.ALL)
+    private List<Appointment> appointments;
 }

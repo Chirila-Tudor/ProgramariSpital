@@ -2,10 +2,13 @@ package ro.chirila.programarispital.service.implementation;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import ro.chirila.programarispital.exception.AppointmentNotFoundException;
+import ro.chirila.programarispital.exception.HallNotFoundException;
+import ro.chirila.programarispital.exception.HospitalHallNotFoundException;
+import ro.chirila.programarispital.exception.UserNotFoundException;
 import ro.chirila.programarispital.repository.EquipmentRepository;
 import ro.chirila.programarispital.repository.HospitalHallRepository;
 import ro.chirila.programarispital.repository.UserRepository;
+import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
 import ro.chirila.programarispital.repository.dto.EquipmentDTO;
 import ro.chirila.programarispital.repository.dto.HospitalHallRequestDTO;
 import ro.chirila.programarispital.repository.dto.HospitalHallResponseDTO;
@@ -18,19 +21,15 @@ import ro.chirila.programarispital.service.HospitalHallService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class HospitalHallServiceImpl implements HospitalHallService {
 
     private final HospitalHallRepository hospitalHallRepository;
 
-
     private final EquipmentRepository equipmentRepository;
 
-
     private final UserRepository userRepository;
-
 
     private final ModelMapper modelMapper;
 
@@ -50,7 +49,7 @@ public class HospitalHallServiceImpl implements HospitalHallService {
             throw new RuntimeException("Doctor not found");
         }
         User doctor = optionalDoctor.get();
-        if (doctor.getRole() != Role.DOCTOR) { // Assuming Role is an enum and user has a getRole() method
+        if (doctor.getRole() != Role.DOCTOR) {
             throw new RuntimeException("The specified user is not a doctor");
         }
 
@@ -72,14 +71,14 @@ public class HospitalHallServiceImpl implements HospitalHallService {
         hospitalHallRepository.save(hospitalHall);
         return new HospitalHallResponseDTO(hospitalHall.getId(), hospitalHall.getRoomName(),
                 hospitalHall.getEquipment().stream()
-                        .map(equipment -> new EquipmentDTO(equipment.getName())).collect(Collectors.toList()),
+                        .map(equipment -> new EquipmentDTO(equipment.getName())).toList(),
                 hospitalHall.getDoctor().getUsername());
     }
 
     @Override
     public List<HospitalHallResponseDTO> getAllHospitalHalls() {
         List<HospitalHall> hospitalHalls = hospitalHallRepository.findAll();
-        return hospitalHalls.stream().map(hospitalHall -> modelMapper.map(hospitalHall, HospitalHallResponseDTO.class)).collect(Collectors.toList());
+        return hospitalHalls.stream().map(hospitalHall -> modelMapper.map(hospitalHall, HospitalHallResponseDTO.class)).toList();
     }
 
     @Override
@@ -87,7 +86,7 @@ public class HospitalHallServiceImpl implements HospitalHallService {
         if (hospitalHallRepository.existsById(id)) {
             hospitalHallRepository.deleteById(id);
         } else {
-            throw new AppointmentNotFoundException("Hall doesn't exists.");
+            throw new HallNotFoundException("Hall doesn't exists.");
         }
     }
 
@@ -131,7 +130,26 @@ public class HospitalHallServiceImpl implements HospitalHallService {
 
     @Override
     public HospitalHallResponseDTO getHospitalHallById(Long hallId) {
-        Optional<HospitalHall> hospitalHall = hospitalHallRepository.findById(hallId);
+        HospitalHall hospitalHall = hospitalHallRepository.findById(hallId).orElseThrow(() -> new HospitalHallNotFoundException("Hall doesn't exists."));
+        return modelMapper.map(hospitalHall, HospitalHallResponseDTO.class);
+    }
+
+    @Override
+    public List<AppointmentResponseDTO> getAppointmentsByHospitalHallId(Long hallId) {
+        HospitalHall hospitalHall = hospitalHallRepository.findById(hallId)
+                .orElseThrow(() -> new HospitalHallNotFoundException("Hospital hall not found."));
+        return hospitalHall.getAppointments().stream()
+                .map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
+    }
+
+    @Override
+    public HospitalHallResponseDTO getHospitalHallByDoctor(String doctorUsername) {
+        User doctor = userRepository.findByUsername(doctorUsername)
+                .orElseThrow(() -> new UserNotFoundException("Doctor not found."));
+
+        HospitalHall hospitalHall = hospitalHallRepository.findByDoctor(doctor)
+                .orElseThrow(() -> new HospitalHallNotFoundException("Hospital hall not found."));
+
         return modelMapper.map(hospitalHall, HospitalHallResponseDTO.class);
     }
 }

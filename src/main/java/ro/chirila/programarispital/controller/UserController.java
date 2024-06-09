@@ -97,16 +97,26 @@ public class UserController {
 
     @Transactional
     @PutMapping("/forgot-password")
-    public ResponseEntity<Boolean> requestNewPassword(@RequestParam("username") String username) {
-        return new ResponseEntity<>(userService.forgotPassword(username), HttpStatus.OK);
+    public ResponseEntity<Boolean> forgotPassword(@RequestParam("username") String username) {
+        String securityCode = userService.forgotPassword(username);
+        String email = userService.getEmailByUsername(username);
+        CompletableFuture.runAsync(() -> sendEmailService.sendForgotPasswordEmail(email,securityCode,username));
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
     @Transactional
     @PostMapping("/request-password")
     public ResponseEntity<Boolean> requestPassword(@RequestParam("username") String username,
                                                    @RequestBody String securityCode) {
-        return new ResponseEntity<>(userService.requestNewPassword(username, securityCode), HttpStatus.OK);
+        String newPassword = userService.requestNewPassword(username, securityCode);
+        String email = userService.getEmailByUsername(username);
+        CompletableFuture.runAsync(() -> sendEmailService.sendPassword(email,username,newPassword));
+        return new ResponseEntity<>(true, HttpStatus.OK);
     }
 
-
+    @GetMapping("/allDoctors")
+    public ResponseEntity<List<UserSecurityDTO>> getAllDoctors() {
+        List<UserSecurityDTO> doctors = userService.getAllDoctors();
+        return new ResponseEntity<>(doctors, HttpStatus.OK);
+    }
 }

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
 import ro.chirila.programarispital.repository.dto.HospitalHallRequestDTO;
 import ro.chirila.programarispital.repository.dto.HospitalHallResponseDTO;
 import ro.chirila.programarispital.service.HospitalHallService;
@@ -29,7 +30,7 @@ public class HospitalHallController {
 
     @Transactional
     @GetMapping("/get-all-halls")
-    public ResponseEntity<List<HospitalHallResponseDTO>> getAllAppointments() {
+    public ResponseEntity<List<HospitalHallResponseDTO>> getAllHalls() {
         return new ResponseEntity<>(hospitalHallService.getAllHospitalHalls(), HttpStatus.OK);
     }
 
@@ -56,5 +57,16 @@ public class HospitalHallController {
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+    @GetMapping("/getAppointmentsByHall")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByHospitalHall(@RequestParam Long hallId) {
+        List<AppointmentResponseDTO> appointments = hospitalHallService.getAppointmentsByHospitalHallId(hallId);
+        return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping("/getDoctorByHall")
+    public ResponseEntity<HospitalHallResponseDTO> getHospitalHallByDoctor(@RequestParam String doctorUsername) {
+        HospitalHallResponseDTO hospitalHall = hospitalHallService.getHospitalHallByDoctor(doctorUsername);
+        return ResponseEntity.ok(hospitalHall);
     }
 }

@@ -9,14 +9,16 @@ import ro.chirila.programarispital.exception.UserAlreadyDeactivatedException;
 import ro.chirila.programarispital.exception.UserAlreadyExistException;
 import ro.chirila.programarispital.exception.UserNotFoundException;
 import ro.chirila.programarispital.repository.UserRepository;
-import ro.chirila.programarispital.repository.dto.*;
+import ro.chirila.programarispital.repository.dto.ChangePasswordDTO;
+import ro.chirila.programarispital.repository.dto.UserExistsDTO;
+import ro.chirila.programarispital.repository.dto.UserResponseDTO;
+import ro.chirila.programarispital.repository.dto.UserSecurityDTO;
 import ro.chirila.programarispital.repository.entity.Role;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static ro.chirila.programarispital.utils.PasswordGenerator.*;
 
@@ -69,8 +71,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
-            // TODO remove hashPassword after adding hashing in UI
-            if (user.getIsActive() && hashPassword(password).equals(user.getPassword())) {
+            if (user.getIsActive() && password.equals(user.getPassword())) {
                 return modelMapper.map(user, UserSecurityDTO.class);
             }
             if (!user.getIsActive() && password.equals(user.getPassword())) {
@@ -82,13 +83,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserExistsDTO setPasswordForPatient(String username) {
+    public UserExistsDTO setPasswordForPatient(String username, String email) {
         Optional<User> user = userRepository.findByUsername(username);
         UserExistsDTO newUser = null;
         String password = "";
         if (user.isEmpty()) {
             password = generatePassword(12);
-            newUser = new UserExistsDTO(username, hashPassword(password), true, true, Role.PATIENT, true);
+            newUser = new UserExistsDTO(username, hashPassword(password), true, true, Role.PATIENT, true,email);
             userRepository.save(modelMapper.map(newUser, User.class));
             newUser.setPassword(password);
         }
@@ -120,12 +121,11 @@ public class UserServiceImpl implements UserService {
 
         String username = changePasswordDTO.getUsername();
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
-        String hashFrontEndPassword = hashPassword(changePasswordDTO.getNewPassword());
 
-        if (!verifyPassword(changePasswordDTO.getOldPassword(), user.getPassword())) {
+        if(!changePasswordDTO.getOldPassword().equals(user.getPassword())){
             return false;
         }
-        user.setPassword(hashFrontEndPassword);
+        user.setPassword(changePasswordDTO.getNewPassword());
         user.setIsFirstLogin(false);
         userRepository.save(user);
         return true;
@@ -133,26 +133,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean forgotPassword(String username) {
+    public String forgotPassword(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             int length = 10;
-            user.setSecurityCode(generateSecurityCode(length));
+            String securityCode = generateSecurityCode(length);
+            user.setSecurityCode(securityCode);
             userRepository.save(user);
-            return true;
+            return securityCode;
         }
-        return false;
+        throw new BadCredentialsException("Wrong security code");
+
     }
 
     @Override
-    public Boolean requestNewPassword(String username, String securityCode) {
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            return user.getSecurityCode().equals(securityCode);
+    public String requestNewPassword(String username, String securityCode) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
+        if (!user.getSecurityCode().equals(securityCode)) {
+            throw new BadCredentialsException("Invalid security code");
         }
-        return false;
+        String password = generatePassword(12);
+        user.setIsFirstLogin(true);
+        user.setPassword(hashPassword(password));
+        userRepository.save(user);
+        return password;
     }
 
     @Override
@@ -165,7 +170,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponseDTO> getAllUsersForAdmin() {
         List<User> users = userRepository.findAll();
-        return users.stream().map(user -> modelMapper.map(user, UserResponseDTO.class)).collect(Collectors.toList());
+        return users.stream().map(user -> modelMapper.map(user, UserResponseDTO.class)).toList();
     }
 
     @Override
@@ -175,6 +180,19 @@ public class UserServiceImpl implements UserService {
         user.setIsActive(!user.getIsActive());
         userRepository.save(user);
         return user.getIsActive();
+    }
+
+    @Override
+    public String getEmailByUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found!"));
+        return user.getEmail();
+    }
+
+    @Override
+    public List<UserSecurityDTO> getAllDoctors() {
+        List<User> users = userRepository.findByRole(Role.DOCTOR);
+        return users.stream().map(user -> modelMapper.map(user, UserSecurityDTO.class)).toList();
+
     }
 
 
