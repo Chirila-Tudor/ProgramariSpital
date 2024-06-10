@@ -22,5 +22,7 @@ public interface AppointmentService {
     AppointmentResponseDTO getAppointmentById(Long id);
 
     List<AppointmentResponseDTO> getAppointmentsByScheduledPerson(String username);
-    
+
+    List<AppointmentResponseDTO> getAppointmentsForDoctor(String doctorUsername);
+    List<String> getAvailableTimes(String chooseDate, String service, String doctorUsername);
 }

@@ -18,6 +18,8 @@ import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.AppointmentService;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -68,24 +70,30 @@ public class AppointmentServiceImpl implements AppointmentService {
         savedAppointment.setPeriodOfAppointment(appointment.getPeriodOfAppointment());
         savedAppointment.setTypeOfServices(new ArrayList<>());
 
-        for (TypeOfServiceDTO typeOfServiceDTO : appointment.getTypeOfServices()) {
-            TypeOfService typeOfService = typeOfServiceRepository.findByService(modelMapper.map(typeOfServiceDTO, TypeOfService.class).getService());
+        TypeOfService selectedService = typeOfServiceRepository.findByService(appointment.getTypeOfServices().get(0).getService());
+        if (selectedService == null) {
+            throw new IllegalArgumentException("Selected service not found: " + appointment.getTypeOfServices().get(0).getService());
+        }
+        savedAppointment.getTypeOfServices().add(selectedService);
 
-            if (typeOfService == null) {
-                savedAppointment.getTypeOfServices().add(modelMapper.map(typeOfServiceDTO, TypeOfService.class));
-            } else {
-                savedAppointment.getTypeOfServices().add(typeOfService);
+        User selectedDoctor = null;
+        for (User doctor : selectedService.getDoctorsWhoCanPerformService()) {
+            boolean isDoctorAvailable = !appointmentRepository.existsByDoctorAndChooseDateAndAppointmentHour(
+                    doctor, savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour());
+            if (isDoctorAvailable) {
+                selectedDoctor = doctor;
+                break;
             }
         }
+
+        if (selectedDoctor == null) {
+            throw new IllegalArgumentException("No available doctors for the selected service at the chosen date and time.");
+        }
+        savedAppointment.setDoctor(selectedDoctor);
+
         HospitalHall hospitalHall = hospitalHallRepository.findByRoomName(appointment.getHospitalHallName())
                 .orElseThrow(() -> new IllegalArgumentException("HospitalHall not found"));
 
-        boolean isConflict = appointmentRepository.existsByHospitalHallAndChooseDateAndAppointmentHour(
-                hospitalHall, savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour());
-
-        if (isConflict) {
-            throw new IllegalArgumentException("An appointment already exists at this time and room.");
-        }
         savedAppointment.setHospitalHall(hospitalHall);
 
         if (optionalUser.isEmpty()) {
@@ -97,7 +105,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return new AppointmentResponseDTO(savedAppointment.getId(), savedAppointment.getEmail(), savedAppointment.getFirstName(),
                 savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(), savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour(),
                 savedAppointment.getPeriodOfAppointment(), savedAppointment.getTypeOfServices().stream().map(typeOfService -> new TypeOfServiceDTO(typeOfService.getService())).toList(),
-                savedAppointment.getScheduledPerson().getUsername());
+                savedAppointment.getScheduledPerson().getUsername(),savedAppointment.getDoctor().getUsername());
 
     }
 
@@ -107,6 +115,14 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Appointment appointment = optionalAppointment.get();
 
+        User doctor = appointment.getDoctor();
+
+        boolean isDoctorAvailable = !appointmentRepository.existsByDoctorAndChooseDateAndAppointmentHour(
+                doctor, appointmentUpdateDTO.getChooseDate(), appointmentUpdateDTO.getAppointmentHour());
+
+        if (!isDoctorAvailable) {
+            throw new IllegalArgumentException("The doctor is not available for the selected date and time.");
+        }
         appointment.setChooseDate(appointmentUpdateDTO.getChooseDate());
         appointment.setAppointmentHour(appointmentUpdateDTO.getAppointmentHour());
         appointment.setPeriodOfAppointment(appointmentUpdateDTO.getPeriodOfAppointment());
@@ -151,5 +167,50 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointments.stream()
                 .map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class)).toList();
     }
+
+    @Override
+    public List<AppointmentResponseDTO> getAppointmentsForDoctor(String doctorUsername) {
+        List<Appointment> appointments = appointmentRepository.findByDoctorUsername(doctorUsername);
+
+        if (appointments.isEmpty()) {
+            throw new IllegalArgumentException("No appointments found for the doctor with username: " + doctorUsername);
+        }
+        return appointments.stream()
+                .map(appointment -> modelMapper.map(appointment, AppointmentResponseDTO.class))
+                .toList();
+    }
+
+    @Override
+    public List<String> getAvailableTimes(String chooseDate, String service, String doctorUsername) {
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        List<String> availableTimes = new ArrayList<>();
+        
+        LocalTime startTime = LocalTime.of(9, 0);
+        LocalTime endTime = LocalTime.of(17, 0);
+
+        TypeOfService selectedService = typeOfServiceRepository.findByService(service);
+        if (selectedService == null) {
+            throw new IllegalArgumentException("Selected service not found: " + service);
+        }
+
+        Optional<User> optionalDoctor = userRepository.findByUsername(doctorUsername);
+        if (optionalDoctor.isEmpty()) {
+            throw new IllegalArgumentException("Doctor not found: " + doctorUsername);
+        }
+        User doctor = optionalDoctor.get();
+
+        for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(30)) {
+            boolean isTimeAvailable = !appointmentRepository.existsByDoctorAndChooseDateAndAppointmentHour(
+                    doctor, chooseDate, time.format(timeFormatter));
+
+            if (isTimeAvailable) {
+                availableTimes.add(time.format(timeFormatter));
+            }
+        }
+
+        return availableTimes;
+    }
+
 
 }

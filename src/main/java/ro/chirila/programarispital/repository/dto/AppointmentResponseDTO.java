@@ -22,4 +22,5 @@ public class AppointmentResponseDTO {
     private PeriodOfAppointment periodOfAppointment;
     private List<TypeOfServiceDTO> typeOfServices;
     private String scheduledPerson;
+    private String doctorUsername;
 }

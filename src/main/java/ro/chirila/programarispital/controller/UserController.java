@@ -68,7 +68,7 @@ public class UserController {
     }
 
     @Transactional
-    @PostMapping("/change-password")
+    @PostMapping("/changePassword")
     public ResponseEntity<Object> changePassword(@RequestBody ChangePasswordDTO changePasswordDTO) {
         boolean passwordChanged = userService.changePassword(changePasswordDTO);
         if (passwordChanged) {
@@ -78,25 +78,25 @@ public class UserController {
     }
 
     @Transactional
-    @GetMapping("/is-first-login")
+    @GetMapping("/isFirstLogin")
     public ResponseEntity<Boolean> isFirstLogin(@RequestParam(name = "username") String username) {
         return new ResponseEntity<>(userService.isFirstLogin(username), HttpStatus.OK);
     }
 
     @Transactional
-    @GetMapping("/get-all-users")
+    @GetMapping("/getAllUsers")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return new ResponseEntity<>(userService.getAllUsersForAdmin(), HttpStatus.OK);
     }
 
     @Transactional
-    @PostMapping("/modify-user-activity")
+    @PostMapping("/modifyUserActivity")
     public ResponseEntity<Boolean> modifyUserActivity(@RequestParam(name = "id") Long id) {
         return new ResponseEntity<>(userService.modifyUserActivity(id), HttpStatus.OK);
     }
 
     @Transactional
-    @PutMapping("/forgot-password")
+    @PutMapping("/forgotPassword")
     public ResponseEntity<Boolean> forgotPassword(@RequestParam("username") String username) {
         String securityCode = userService.forgotPassword(username);
         String email = userService.getEmailByUsername(username);
@@ -105,7 +105,7 @@ public class UserController {
     }
 
     @Transactional
-    @PostMapping("/request-password")
+    @PostMapping("/requestPassword")
     public ResponseEntity<Boolean> requestPassword(@RequestParam("username") String username,
                                                    @RequestBody String securityCode) {
         String newPassword = userService.requestNewPassword(username, securityCode);

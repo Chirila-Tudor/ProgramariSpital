@@ -5,7 +5,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ro.chirila.programarispital.repository.dto.*;
+import ro.chirila.programarispital.repository.dto.AppointmentRequestDTO;
+import ro.chirila.programarispital.repository.dto.AppointmentResponseDTO;
+import ro.chirila.programarispital.repository.dto.AppointmentUpdateDTO;
+import ro.chirila.programarispital.repository.dto.UserExistsDTO;
 import ro.chirila.programarispital.service.AppointmentService;
 import ro.chirila.programarispital.service.SendEmailService;
 import ro.chirila.programarispital.service.UserService;
@@ -28,7 +31,7 @@ public class AppointmentController {
         this.userService = userService;
     }
 
-    @PostMapping("/create-appointment")
+    @PostMapping("/createAppointment")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> addAppointment(@RequestBody AppointmentRequestDTO appointmentRequestDTO
             , @RequestParam String username) {
@@ -42,7 +45,7 @@ public class AppointmentController {
         return new ResponseEntity<>(appointmentResponseDTO, HttpStatus.CREATED);
     }
 
-    @PutMapping("/update-appointment")
+    @PutMapping("/updateAppointment")
     @Transactional
     public ResponseEntity<AppointmentResponseDTO> updateAppointment(@RequestParam Long id,
                                                                     @RequestBody AppointmentUpdateDTO appointmentUpdateDTO) {
@@ -50,7 +53,7 @@ public class AppointmentController {
         return new ResponseEntity<>(appointmentService.updateAppointment(id, appointmentUpdateDTO), HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete-appointment")
+    @DeleteMapping("/deleteAppointment")
     @Transactional
     public ResponseEntity<String> deleteAppointment(@RequestParam Long id) {
         appointmentService.deleteAppointmentById(id);
@@ -58,13 +61,13 @@ public class AppointmentController {
     }
 
     @Transactional
-    @GetMapping("/get-all-appointments")
+    @GetMapping("/getAllAppointments")
     public ResponseEntity<List<AppointmentResponseDTO>> getAllAppointments() {
         return new ResponseEntity<>(appointmentService.getAllAppointments(), HttpStatus.OK);
     }
 
     @Transactional
-    @GetMapping("/future-appointments")
+    @GetMapping("/getFutureAppointments")
     public ResponseEntity<List<AppointmentResponseDTO>> getAllFutureAppointments() {
         return new ResponseEntity<>(appointmentService.getAllFutureAppointments(), HttpStatus.OK);
     }
@@ -80,5 +83,20 @@ public class AppointmentController {
     @GetMapping("/getAppointmentForUser")
     public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsByScheduledPerson(@RequestParam String username) {
         return new ResponseEntity<>(appointmentService.getAppointmentsByScheduledPerson(username), HttpStatus.OK);
+    }
+
+    @GetMapping("/getAllAppointmentsByDoctor")
+    public ResponseEntity<List<AppointmentResponseDTO>> getAppointmentsForDoctor(@RequestParam String username) {
+        List<AppointmentResponseDTO> appointments = appointmentService.getAppointmentsForDoctor(username);
+        return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping("/getAvailableTimes")
+    public ResponseEntity<List<String>> getAvailableTimes(
+            @RequestParam String chooseDate,
+            @RequestParam String service,
+            @RequestParam String doctorUsername) {
+        List<String> availableTimes = appointmentService.getAvailableTimes(chooseDate, service,doctorUsername);
+        return ResponseEntity.ok(availableTimes);
     }
 }

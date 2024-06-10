@@ -20,7 +20,7 @@ public class TypeOfServiceController {
         this.typeOfWorkService = typeOfWorkService;
     }
 
-    @PostMapping("/add")
+    @PostMapping("/addService")
     public ResponseEntity<TypeOfServiceResponseDTO> addService(@RequestBody TypeOfServiceRequestDTO typeOfServiceRequestDTO) {
         try {
             TypeOfServiceResponseDTO response = typeOfWorkService.addService(typeOfServiceRequestDTO);
@@ -31,7 +31,7 @@ public class TypeOfServiceController {
     }
 
     @Transactional
-    @GetMapping("/get-all-services")
+    @GetMapping("/getAllServices")
     public ResponseEntity<List<TypeOfServiceResponseDTO>> getAllServices() {
         return new ResponseEntity<>(typeOfWorkService.getAllTypeOfServices(), HttpStatus.OK);
     }

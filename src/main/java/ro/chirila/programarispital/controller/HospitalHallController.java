@@ -22,26 +22,26 @@ public class HospitalHallController {
     }
 
     @Transactional
-    @PostMapping("/add-hall")
+    @PostMapping("/addHall")
     public ResponseEntity<HospitalHallResponseDTO> addHospitalHall(@RequestBody HospitalHallRequestDTO hallRequest) {
         HospitalHallResponseDTO responseDTO = hospitalHallService.addHospitalHall(hallRequest);
         return new ResponseEntity<>(responseDTO, HttpStatus.CREATED);
     }
 
     @Transactional
-    @GetMapping("/get-all-halls")
+    @GetMapping("/getAllHalls")
     public ResponseEntity<List<HospitalHallResponseDTO>> getAllHalls() {
         return new ResponseEntity<>(hospitalHallService.getAllHospitalHalls(), HttpStatus.OK);
     }
 
     @Transactional
-    @DeleteMapping("/delete-hall")
+    @DeleteMapping("/deleteHall")
     public ResponseEntity<String> deleteHall(@RequestParam Long id) {
         hospitalHallService.deleteHospitalHallById(id);
         return new ResponseEntity<>("Hall successfully deleted!", HttpStatus.OK);
     }
 
-    @PutMapping("/update-hall")
+    @PutMapping("/updateHall")
     public ResponseEntity<HospitalHallResponseDTO> updateHospitalHall(
             @RequestParam("hallId") Long hallId,
             @RequestBody HospitalHallRequestDTO hospitalHallRequestDTO) {
