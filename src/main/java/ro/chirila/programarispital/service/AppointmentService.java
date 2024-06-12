@@ -24,5 +24,7 @@ public interface AppointmentService {
     List<AppointmentResponseDTO> getAppointmentsByScheduledPerson(String username);
 
     List<AppointmentResponseDTO> getAppointmentsForDoctor(String doctorUsername);
-    List<String> getAvailableTimes(String chooseDate, String service, String doctorUsername);
+    List<String> getAvailableTimes(String chooseDate, Long idService, String doctorUsername);
+
+    boolean isDoctorAvailableOnDate(String chooseDate, Long idService, String doctorUsername);
 }

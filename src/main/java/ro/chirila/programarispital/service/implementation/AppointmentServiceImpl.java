@@ -104,7 +104,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(savedAppointment);
         return new AppointmentResponseDTO(savedAppointment.getId(), savedAppointment.getEmail(), savedAppointment.getFirstName(),
                 savedAppointment.getLastName(), savedAppointment.getPhoneNumber(), savedAppointment.getDateOfBirth(), savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour(),
-                savedAppointment.getPeriodOfAppointment(), savedAppointment.getTypeOfServices().stream().map(typeOfService -> new TypeOfServiceDTO(typeOfService.getService())).toList(),
+                savedAppointment.getPeriodOfAppointment(), savedAppointment.getTypeOfServices().stream().map(typeOfService -> new TypeOfServiceDTO(typeOfService.getId(),typeOfService.getService())).toList(),
                 savedAppointment.getScheduledPerson().getUsername(),savedAppointment.getDoctor().getUsername());
 
     }
@@ -181,18 +181,13 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public List<String> getAvailableTimes(String chooseDate, String service, String doctorUsername) {
+    public List<String> getAvailableTimes(String chooseDate, Long idService, String doctorUsername) {
 
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         List<String> availableTimes = new ArrayList<>();
-        
-        LocalTime startTime = LocalTime.of(9, 0);
-        LocalTime endTime = LocalTime.of(17, 0);
 
-        TypeOfService selectedService = typeOfServiceRepository.findByService(service);
-        if (selectedService == null) {
-            throw new IllegalArgumentException("Selected service not found: " + service);
-        }
+        LocalTime startTime = LocalTime.of(9, 0);
+        LocalTime endTime = LocalTime.of(21, 0);
 
         Optional<User> optionalDoctor = userRepository.findByUsername(doctorUsername);
         if (optionalDoctor.isEmpty()) {
@@ -210,6 +205,36 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         return availableTimes;
+    }
+
+    @Override
+    public boolean isDoctorAvailableOnDate(String chooseDate, Long idService, String doctorUsername) {
+        TypeOfService selectedService = typeOfServiceRepository.findById(idService).orElse(null);
+        if (selectedService == null) {
+            throw new IllegalArgumentException("Selected service not found: " + idService);
+        }
+
+        Optional<User> optionalDoctor = userRepository.findByUsername(doctorUsername);
+        if (optionalDoctor.isEmpty()) {
+            throw new IllegalArgumentException("Doctor not found: " + doctorUsername);
+        }
+        User doctor = optionalDoctor.get();
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalTime startTime = LocalTime.of(9, 0);
+        LocalTime endTime = LocalTime.of(21, 0);
+
+        for (LocalTime time = startTime; time.isBefore(endTime); time = time.plusMinutes(30)) {
+            String timeFormatted = time.format(timeFormatter);
+            boolean isTimeSlotBooked = appointmentRepository.existsByDoctorAndChooseDateAndAppointmentHour(
+                    doctor, chooseDate, timeFormatted);
+
+            if (!isTimeSlotBooked) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 

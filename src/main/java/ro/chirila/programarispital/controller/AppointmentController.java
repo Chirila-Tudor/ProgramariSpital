@@ -13,7 +13,9 @@ import ro.chirila.programarispital.service.AppointmentService;
 import ro.chirila.programarispital.service.SendEmailService;
 import ro.chirila.programarispital.service.UserService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -94,9 +96,23 @@ public class AppointmentController {
     @GetMapping("/getAvailableTimes")
     public ResponseEntity<List<String>> getAvailableTimes(
             @RequestParam String chooseDate,
-            @RequestParam String service,
+            @RequestParam Long idService,
             @RequestParam String doctorUsername) {
-        List<String> availableTimes = appointmentService.getAvailableTimes(chooseDate, service,doctorUsername);
+        List<String> availableTimes = appointmentService.getAvailableTimes(chooseDate, idService, doctorUsername);
         return ResponseEntity.ok(availableTimes);
+    }
+
+    @GetMapping("/getDateAvailability")
+    public ResponseEntity<Map<String, Object>> getDoctorDateAvailability(
+            @RequestParam String chooseDate,
+            @RequestParam Long idService,
+            @RequestParam String doctorUsername) {
+
+        boolean isAvailable = appointmentService.isDoctorAvailableOnDate(chooseDate, idService, doctorUsername);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isAvailable", isAvailable);
+
+        return ResponseEntity.ok(response);
     }
 }
