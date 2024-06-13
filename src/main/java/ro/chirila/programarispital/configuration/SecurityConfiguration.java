@@ -17,7 +17,6 @@ public class SecurityConfiguration {
                         .permitAll()
                         .anyRequest()
                         .authenticated());
-
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

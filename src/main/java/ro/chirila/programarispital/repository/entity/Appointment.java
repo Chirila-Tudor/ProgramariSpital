@@ -63,6 +63,10 @@ public class Appointment {
     @JoinColumn(name = "id_person", referencedColumnName = "id_person")
     private User scheduledPerson;
 
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    private User doctor;
+
     @JsonIgnoreProperties("appointments")
     @ManyToOne
     @JoinColumn(name = "id_hall", referencedColumnName = "id_hall")
