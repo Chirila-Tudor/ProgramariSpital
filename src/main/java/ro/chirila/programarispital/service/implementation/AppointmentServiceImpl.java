@@ -68,23 +68,25 @@ public class AppointmentServiceImpl implements AppointmentService {
         savedAppointment.setChooseDate(appointment.getChooseDate());
         savedAppointment.setAppointmentHour(appointment.getAppointmentHour());
         savedAppointment.setPeriodOfAppointment(appointment.getPeriodOfAppointment());
-        savedAppointment.setTypeOfServices(new ArrayList<>());
+        //savedAppointment.setTypeOfServices(new ArrayList<>());
 
-        TypeOfService selectedService = typeOfServiceRepository.findByService(appointment.getTypeOfServices().get(0).getService());
-        if (selectedService == null) {
-            throw new IllegalArgumentException("Selected service not found: " + appointment.getTypeOfServices().get(0).getService());
+        TypeOfService selectedService;
+        try {
+            selectedService = typeOfServiceRepository.findById(Long.parseLong(appointment.getTypeOfServices()))
+                    .orElseThrow(() -> new IllegalArgumentException("Selected service not found with ID: " + appointment.getTypeOfServices()));
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Invalid service ID: " + appointment.getTypeOfServices());
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Error finding selected service: " + ex.getMessage());
         }
         savedAppointment.getTypeOfServices().add(selectedService);
 
-        User selectedDoctor = null;
-        for (User doctor : selectedService.getDoctorsWhoCanPerformService()) {
-            boolean isDoctorAvailable = !appointmentRepository.existsByDoctorAndChooseDateAndAppointmentHour(
-                    doctor, savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour());
-            if (isDoctorAvailable) {
-                selectedDoctor = doctor;
-                break;
-            }
-        }
+        User selectedDoctor = selectedService.getDoctorsWhoCanPerformService().stream()
+                .filter(doctor -> !appointmentRepository.existsByDoctorAndChooseDateAndAppointmentHour(
+                        doctor, savedAppointment.getChooseDate(), savedAppointment.getAppointmentHour()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No available doctors for the selected service at the chosen date and time."));
+        savedAppointment.setDoctor(selectedDoctor);
 
         if (selectedDoctor == null) {
             throw new IllegalArgumentException("No available doctors for the selected service at the chosen date and time.");
