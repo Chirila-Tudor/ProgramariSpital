@@ -4,8 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import ro.chirila.programarispital.repository.entity.PeriodOfAppointment;
 
-import java.util.List;
-
 @Data
 public class AppointmentRequestDTO {
     @NotBlank(message = "Please enter a valid email.")
@@ -25,7 +23,7 @@ public class AppointmentRequestDTO {
     @NotBlank(message = "Please choose the period of time.")
     private PeriodOfAppointment periodOfAppointment;
     @NotBlank(message = "Please choose the type of service.")
-    private List<TypeOfServiceDTO> typeOfServices;
+    private String typeOfServices;
     @NotBlank(message = "Please enter the name of the hospital hall.")
     private String hospitalHallName;
 }
