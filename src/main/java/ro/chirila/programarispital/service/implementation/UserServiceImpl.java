@@ -17,6 +17,7 @@ import ro.chirila.programarispital.repository.entity.Role;
 import ro.chirila.programarispital.repository.entity.User;
 import ro.chirila.programarispital.service.UserService;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,7 +90,7 @@ public class UserServiceImpl implements UserService {
         String password = "";
         if (user.isEmpty()) {
             password = generatePassword(12);
-            newUser = new UserExistsDTO(username, hashPassword(password), true, true, Role.PATIENT, true,email);
+            newUser = new UserExistsDTO(username, hashPassword(password), true, true, Role.Pacient, true,email);
             userRepository.save(modelMapper.map(newUser, User.class));
             newUser.setPassword(password);
         }
@@ -190,9 +191,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserSecurityDTO> getAllDoctors() {
-        List<User> users = userRepository.findByRole(Role.DOCTOR);
+        List<User> users = userRepository.findByRole(Role.Doctor);
         return users.stream().map(user -> modelMapper.map(user, UserSecurityDTO.class)).toList();
 
+    }
+
+    @Override
+    public List<String> getUserOptions() {
+        return Arrays.asList("Admin", "Doctor", "Asistentă");
     }
 
 

@@ -119,4 +119,10 @@ public class UserController {
         List<UserSecurityDTO> doctors = userService.getAllDoctors();
         return new ResponseEntity<>(doctors, HttpStatus.OK);
     }
+
+    @GetMapping("/optionUser")
+    public ResponseEntity<List<String>> getUserOptions() {
+        List<String> options = userService.getUserOptions();
+        return ResponseEntity.ok(options);
+    }
 }

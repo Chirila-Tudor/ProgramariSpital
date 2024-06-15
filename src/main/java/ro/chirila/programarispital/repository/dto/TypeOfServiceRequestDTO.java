@@ -16,4 +16,7 @@ public class TypeOfServiceRequestDTO {
 
     @NotBlank(message = "Please enter a valid doctor.")
     private List<String> doctorsWhoCanPerformService;
+
+    @NotBlank(message = "Please enter a valid duration.")
+    private Integer duration;
 }

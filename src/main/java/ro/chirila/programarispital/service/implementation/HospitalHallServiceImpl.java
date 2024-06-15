@@ -49,7 +49,7 @@ public class HospitalHallServiceImpl implements HospitalHallService {
             throw new RuntimeException("Doctor not found");
         }
         User doctor = optionalDoctor.get();
-        if (doctor.getRole() != Role.DOCTOR) {
+        if (doctor.getRole() != Role.Doctor) {
             throw new RuntimeException("The specified user is not a doctor");
         }
 
@@ -101,7 +101,7 @@ public class HospitalHallServiceImpl implements HospitalHallService {
         if (hospitalHallRequestDTO.getDoctorUsername() != null) {
             User doctor = userRepository.findByUsername(hospitalHallRequestDTO.getDoctorUsername())
                     .orElseThrow(() -> new RuntimeException("Doctor not found"));
-            if (doctor.getRole() != Role.DOCTOR) {
+            if (doctor.getRole() != Role.Doctor) {
                 throw new RuntimeException("The specified user is not a doctor");
             }
             hospitalHall.setDoctor(doctor);

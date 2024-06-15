@@ -40,5 +40,6 @@ public class TypeOfService {
     @ManyToMany(mappedBy = "services")
     @JsonIgnoreProperties("services")
     private List<User> doctorsWhoCanPerformService;
+    private Integer duration;
 
 }
