@@ -69,7 +69,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         savedAppointment.setChooseDate(appointment.getChooseDate());
         savedAppointment.setAppointmentHour(appointment.getAppointmentHour());
         savedAppointment.setPeriodOfAppointment(appointment.getPeriodOfAppointment());
-        //savedAppointment.setTypeOfServices(new ArrayList<>());
 
         TypeOfService selectedService;
         try {
