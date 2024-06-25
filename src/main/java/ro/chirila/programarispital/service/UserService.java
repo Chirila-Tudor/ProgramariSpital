@@ -37,4 +37,6 @@ public interface UserService {
     Boolean modifyUserActivity(Long id);
     String getEmailByUsername(String username);
     List<UserSecurityDTO> getAllDoctors();
+
+    List<String> getUserOptions();
 }

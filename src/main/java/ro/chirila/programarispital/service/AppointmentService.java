@@ -27,4 +27,5 @@ public interface AppointmentService {
     List<String> getAvailableTimes(String chooseDate, Long idService, String doctorUsername);
 
     boolean isDoctorAvailableOnDate(String chooseDate, Long idService, String doctorUsername);
+    List<String> getPeriodOptions();
 }

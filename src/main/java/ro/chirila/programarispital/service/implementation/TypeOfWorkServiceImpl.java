@@ -35,6 +35,8 @@ public class TypeOfWorkServiceImpl implements TypeOfWorkService {
         TypeOfService typeOfService = new TypeOfService();
 
         typeOfService.setService(typeOfServiceRequestDTO.getService());
+        typeOfService.setDuration(typeOfServiceRequestDTO.getDuration()); // Set the duration
+
         List<String> doctorUsernames = typeOfServiceRequestDTO.getDoctorsWhoCanPerformService();
         List<User> doctors = new ArrayList<>();
 
@@ -44,7 +46,7 @@ public class TypeOfWorkServiceImpl implements TypeOfWorkService {
                 throw new RuntimeException("Doctor not found: " + doctorUsername);
             }
             User doctor = optionalDoctor.get();
-            if (doctor.getRole() != Role.DOCTOR) {
+            if (doctor.getRole() != Role.Doctor) {
                 throw new RuntimeException("The specified user is not a doctor: " + doctorUsername);
             }
             doctors.add(doctor);
@@ -63,11 +65,13 @@ public class TypeOfWorkServiceImpl implements TypeOfWorkService {
             doctor.setServices(services);
             userRepository.save(doctor);
         }
+
         List<String> usernames = new ArrayList<>();
-        for(User user : doctors){
+        for (User user : doctors) {
             usernames.add(user.getUsername());
         }
-        return new TypeOfServiceResponseDTO(typeOfService.getId(), typeOfService.getService(), usernames);
+
+        return new TypeOfServiceResponseDTO(typeOfService.getId(), typeOfService.getService(), usernames, typeOfService.getDuration());
     }
 
     @Override
@@ -79,7 +83,7 @@ public class TypeOfWorkServiceImpl implements TypeOfWorkService {
             for(User user : typeOfService.getDoctorsWhoCanPerformService()){
                 usernames.add(user.getUsername());
             }
-            typeOfServiceResponseDTOS.add(new TypeOfServiceResponseDTO(typeOfService.getId(),typeOfService.getService(),usernames));
+            typeOfServiceResponseDTOS.add(new TypeOfServiceResponseDTO(typeOfService.getId(),typeOfService.getService(),usernames,typeOfService.getDuration()));
         }
         return typeOfServiceResponseDTOS;
     }

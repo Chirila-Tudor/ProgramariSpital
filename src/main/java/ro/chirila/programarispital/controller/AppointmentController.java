@@ -115,4 +115,10 @@ public class AppointmentController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/optionPeriod")
+    public ResponseEntity<List<String>> getPeriodOptions() {
+        List<String> options = appointmentService.getPeriodOptions();
+        return ResponseEntity.ok(options);
+    }
 }

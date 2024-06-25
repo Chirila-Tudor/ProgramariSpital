@@ -13,4 +13,5 @@ public class TypeOfServiceResponseDTO {
     private Long id;
     private String service;
     private List<String> doctorsWhoCanPerformService;
+    private Integer duration;
 }
