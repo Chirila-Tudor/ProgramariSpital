@@ -215,12 +215,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                     break;
                 }
             }
-
             if (isTimeAvailable) {
                 availableTimes.add(time.format(timeFormatter));
             }
         }
-
         return availableTimes;
     }
 
@@ -250,12 +248,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                     break;
                 }
             }
-
             if (isTimeSlotAvailable) {
                 return true;
             }
         }
-
         return false;
     }
 
