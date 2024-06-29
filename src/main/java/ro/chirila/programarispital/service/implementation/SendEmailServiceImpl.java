@@ -35,7 +35,7 @@ public class SendEmailServiceImpl implements SendEmailService {
 
     @Value("${spring.mail.password}")
     private String password;
-    private String companyName = "Hospital appointment software";
+    private String companyName = "Spitalul General \"Armonia\"";
 
     public SendEmailServiceImpl(JavaMailSender emailSender, Configuration configuration, AppointmentRepository appointmentRepository) {
         this.emailSender = emailSender;
